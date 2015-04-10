@@ -21,14 +21,12 @@ package net.rcarz.jiraclient;
 
 import java.util.Map;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
-
 /**
  * Represents an issue link.
  */
 public class IssueLink extends Resource {
 
+	public static final String URI = "issueLink";
     private LinkType type = null;
     private Issue inwardIssue = null;
     private Issue outwardIssue = null;
@@ -36,66 +34,26 @@ public class IssueLink extends Resource {
     /**
      * Creates a issue link from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected IssueLink(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected IssueLink(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
-    }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        self = Field.getString(map.get("self"));
-        id = Field.getString(map.get("id"));
-        type = Field.getResource(LinkType.class, map.get("type"), restclient);
-        outwardIssue = Field.getResource(Issue.class, map.get("outwardIssue"), restclient);
-        inwardIssue = Field.getResource(Issue.class, map.get("inwardIssue"), restclient);
-    }
-
-    /**
-     * Deletes this issue link record.
-     *
-     * @throws JiraException when the delete fails
-     */
-    public void delete() throws JiraException {
-
-        try {
-            restclient.delete(getBaseUri() + "issueLink/" + id);
-        } catch (Exception ex) {
-            throw new JiraException("Failed to delete issue link " + id, ex);
+        if (data != null) {
+        	deserialise(data);
         }
     }
-
+    
     /**
-     * Retrieves the given issue link record.
-     *
-     * @param restclient REST client instance
-     * @param id Internal JIRA ID of the issue link
-     *
-     * @return a issue link instance
-     *
-     * @throws JiraException when the retrieval fails
+     * @param data Map of the JSON payload
      */
-    public static IssueLink get(RestClient restclient, String id)
-        throws JiraException {
-
-        JSON result = null;
-
-        try {
-            result = restclient.get(getBaseUri() + "issueLink/" + id);
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve issue link " + id, ex);
-        }
-
-        if (!(result instanceof JSONObject))
-            throw new JiraException("JSON payload is malformed");
-
-        return new IssueLink(restclient, (JSONObject)result);
-    }
+    @Override
+	protected void deserialise(Map<String, Object> data) throws JiraException {
+    	type = Field.getResource(LinkType.class, data.get("type"));
+        outwardIssue = Field.getResource(Issue.class, data.get("outwardIssue"));
+        inwardIssue = Field.getResource(Issue.class, data.get("inwardIssue"));
+	}
 
     @Override
     public String toString() {
@@ -114,4 +72,3 @@ public class IssueLink extends Resource {
         return inwardIssue;
     }
 }
-

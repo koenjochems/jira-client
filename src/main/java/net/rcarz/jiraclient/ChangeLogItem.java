@@ -21,8 +21,6 @@ package net.rcarz.jiraclient;
 
 import java.util.Map;
 
-import net.sf.json.JSONObject;
-
 /**
  * Item in a {@link ChangeLogEntry}.
  */
@@ -60,30 +58,29 @@ public class ChangeLogItem extends Resource {
     /**
      * Creates a change log item from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected ChangeLogItem(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected ChangeLogItem(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
+        if (data != null) {
+        	deserialise(data);
+        }
     }
-
+    
     /**
-     * Deserializes the json payload.
-     * @param json the json payload
+     * @param data Map of the JSON payload
      */
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        field = Field.getString(map.get("field"));
-        fieldType = Field.getString(map.get("fieldtype"));
-        from = Field.getString(map.get("from"));
-        fromString = Field.getString(map.get("fromString"));
-        to = Field.getString(map.get("to"));
-        toString = Field.getString(map.get("toString"));
-    }
+    @Override
+	protected void deserialise(Map<String, Object> data) {
+    	field = Field.getString(data.get("field"));
+        fieldType = Field.getString(data.get("fieldtype"));
+        from = Field.getString(data.get("from"));
+        fromString = Field.getString(data.get("fromString"));
+        to = Field.getString(data.get("to"));
+        toString = Field.getString(data.get("toString"));
+	}
 
     /**
      * Obtains the field changed.

@@ -1,22 +1,25 @@
 package net.rcarz.jiraclient;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
+import java.util.Map;
+
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
+
 import org.junit.Test;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-
 
 public class IssueTypeTest {
 
     @Test
-    public void testIssueTypeInit() {
-        IssueType issueType = new IssueType(null, null);
+    public void testIssueTypeInit() throws JiraException {
+        new IssueType(null);
     }
 
     @Test
-    public void testGetIssueType() {
-        IssueType issueType = new IssueType(null, getTestJSON());
+    public void testGetIssueType() throws JiraException {
+        IssueType issueType = new IssueType(getTestData());
 
         assertFalse(issueType.isSubtask());
         assertEquals(issueType.getName(), "Story");
@@ -26,13 +29,13 @@ public class IssueTypeTest {
     }
 
     @Test
-    public void testIssueTypeToString(){
-        IssueType issueType = new IssueType(null, getTestJSON());
+    public void testIssueTypeToString() throws JiraException{
+        IssueType issueType = new IssueType(getTestData());
 
         assertEquals(issueType.toString(),"Story");
     }
 
-    private JSONObject getTestJSON() {
+    private Map<String, Object> getTestData() throws JSONException, JiraException {
         JSONObject jsonObject = new JSONObject();
 
         jsonObject.put("self", "https://brainbubble.atlassian.net/rest/api/2/issuetype/7");
@@ -42,6 +45,6 @@ public class IssueTypeTest {
         jsonObject.put("name", "Story");
         jsonObject.put("subtask", false);
 
-        return jsonObject;
+        return RestClient.JSONtoMap(jsonObject);
     }
 }

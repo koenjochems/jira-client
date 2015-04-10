@@ -1,5 +1,5 @@
 /**
- * jira-client - a simple JIRA REST client
+ * jira-client - a simple JIR7A REST client
  * Copyright (c) 2013 Bob Carroll (bob.carroll@alum.rit.edu)
  * 
  * This library is free software; you can redistribute it and/or
@@ -22,77 +22,45 @@ package net.rcarz.jiraclient;
 import java.util.Date;
 import java.util.Map;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
-
 /**
  * Represents an issue work log.
  */
 public class WorkLog extends Resource {
 
+	public static final String URI = "worklog";
+	
     private User author = null;
     private String comment = null;
     private Date created = null;
     private Date updated = null;
     private User updatedAuthor = null;
-    //private Date started = null;
-    //private String timeSpent = null;
     private int timeSpentSeconds = 0;
 
     /**
      * Creates a work log from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected WorkLog(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected WorkLog(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
-    }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        self = Field.getString(map.get("self"));
-        id = Field.getString(map.get("id"));
-        author = Field.getResource(User.class, map.get("author"), restclient);
-        comment = Field.getString(map.get("comment"));
-        created = Field.getDate(map.get("created"));
-        updated = Field.getDate(map.get("updated"));
-        updatedAuthor = Field.getResource(User.class, map.get("updatedAuthor"), restclient);
-        //started = Field.getDate(map.get("started"));
-        //timeSpent = Field.getString(map.get("timeSpent"));
-        timeSpentSeconds = Field.getInteger(map.get("timeSpentSeconds"));
+        if (data != null) {
+            deserialise(data);
+        }
     }
 
     /**
-     * Retrieves the given work log record.
-     *
-     * @param restclient REST client instance
-     * @param issue Internal JIRA ID of the associated issue
-     * @param id Internal JIRA ID of the work log
-     *
-     * @return a work log instance
-     *
-     * @throws JiraException when the retrieval fails
+     * @param data Map of the JSON payload
      */
-    public static WorkLog get(RestClient restclient, String issue, String id)
-        throws JiraException {
-
-        JSON result = null;
-
-        try {
-            result = restclient.get(getBaseUri() + "issue/" + issue + "/worklog/" + id);
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve work log " + id + " on issue " + issue, ex);
-        }
-
-        if (!(result instanceof JSONObject))
-            throw new JiraException("JSON payload is malformed");
-
-        return new WorkLog(restclient, (JSONObject)result);
+    @Override
+    protected void deserialise(Map<String, Object> data) throws JiraException {
+        author = Field.getResource(User.class, data.get("author"));
+        comment = Field.getString(data.get("comment"));
+        created = Field.getDate(data.get("created"));
+        updated = Field.getDate(data.get("updated"));
+        updatedAuthor = Field.getResource(User.class, data.get("updatedAuthor"));
+        timeSpentSeconds = Field.getInteger(data.get("timeSpentSeconds"));
     }
 
     @Override
@@ -124,4 +92,3 @@ public class WorkLog extends Resource {
         return timeSpentSeconds;
     }
 }
-

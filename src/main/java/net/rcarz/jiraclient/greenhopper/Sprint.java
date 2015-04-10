@@ -19,14 +19,11 @@
 
 package net.rcarz.jiraclient.greenhopper;
 
-import net.rcarz.jiraclient.Field;
-import net.rcarz.jiraclient.RestClient;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.json.JSONObject;
+import net.rcarz.jiraclient.JiraException;
 
 import org.joda.time.DateTime;
 
@@ -35,8 +32,9 @@ import org.joda.time.DateTime;
  */
 public class Sprint extends GreenHopperResource {
 
-    private String name = null;
-    private boolean closed = false;
+	public static final String URI = RESOURCE_URI + "sprintquery";
+	
+	private boolean closed = false;
     private DateTime startDate = null;
     private DateTime endDate = null;
     private DateTime completeDate = null;
@@ -46,36 +44,28 @@ public class Sprint extends GreenHopperResource {
     /**
      * Creates a sprint from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected Sprint(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected Sprint(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
+        if (data != null) {
+        	deserialise(data);
+        }
     }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        id = Field.getInteger(map.get("id"));
-        name = Field.getString(map.get("name"));
-        closed = map.containsValue("CLOSED");
-        startDate = GreenHopperField.getDateTime(map.get("startDate"));
-        endDate = GreenHopperField.getDateTime(map.get("endDate"));
-        completeDate = GreenHopperField.getDateTime(map.get("completeDate"));
-        issuesIds = GreenHopperField.getIntegerArray(map.get("issuesIds"));
-    }
-
+    
+    /**
+     * @param data Map of the JSON payload
+     */
     @Override
-    public String toString() {
-        return name;
-    }
-
-    public String getName() {
-        return name;
-    }
+	protected void deserialise(Map<String, Object> data) {
+    	closed = data.containsValue("CLOSED");
+        startDate = GreenHopperField.getDateTime(data.get("startDate"));
+        endDate = GreenHopperField.getDateTime(data.get("endDate"));
+        completeDate = GreenHopperField.getDateTime(data.get("completeDate"));
+        issuesIds = GreenHopperField.getIntegerArray(data.get("issuesIds"));
+	}
 
     public Boolean isClosed() {
         return closed;
@@ -94,7 +84,7 @@ public class Sprint extends GreenHopperResource {
     }
 
     public List<SprintIssue> getIssues(){
-        if(issues == null){
+        if (issues == null) {
             issues = new ArrayList<SprintIssue>();
         }
         return issues;
@@ -104,4 +94,3 @@ public class Sprint extends GreenHopperResource {
         return issuesIds;
     }
 }
-

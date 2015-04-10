@@ -19,47 +19,34 @@
 
 package net.rcarz.jiraclient.greenhopper;
 
-import net.rcarz.jiraclient.Field;
-import net.rcarz.jiraclient.RestClient;
-
 import java.util.Map;
 
-import net.sf.json.JSONObject;
+import net.rcarz.jiraclient.JiraException;
 
 /**
  * Represents a GreenHopper marker (a sprint that hasn't started).
  */
 public class Marker extends GreenHopperResource {
-
-    private String name = null;
-
     /**
      * Creates a marker from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected Marker(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected Marker(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
+        if (data != null) {
+        	deserialise(data);
+        }
     }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        id = Field.getInteger(map.get("id"));
-        name = Field.getString(map.get("name"));
-    }
-
+    
+    /**
+     * @param data Map of the JSON payload
+     */
     @Override
-    public String toString() {
-        return name;
-    }
-
-    public String getName() {
-        return name;
-    }
+	protected void deserialise(Map<String, Object> data) {
+		// TODO Auto-generated method stub
+		
+	}
 }
-

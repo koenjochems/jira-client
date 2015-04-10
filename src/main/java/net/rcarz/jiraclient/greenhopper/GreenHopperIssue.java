@@ -19,22 +19,16 @@
 
 package net.rcarz.jiraclient.greenhopper;
 
-import net.rcarz.jiraclient.Field;
-import net.rcarz.jiraclient.Issue;
-import net.rcarz.jiraclient.JiraException;
-import net.rcarz.jiraclient.RestClient;
-
 import java.util.List;
 import java.util.Map;
 
-import net.sf.json.JSONObject;
+import net.rcarz.jiraclient.JiraException;
 
 /**
  * A base class for GreenHopper issues.
  */
-public abstract class GreenHopperIssue extends GreenHopperResource {
+public class GreenHopperIssue extends GreenHopperResource {
 
-    private String key = null;
     private boolean hidden = false;
     private String summary = null;
     private String typeName = null;
@@ -56,60 +50,46 @@ public abstract class GreenHopperIssue extends GreenHopperResource {
     /**
      * Creates an issue from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected GreenHopperIssue(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected GreenHopperIssue(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
+        if (data != null) {
+        	deserialise(data);
+        }
     }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        id = Field.getInteger(map.get("id"));
-        key = Field.getString(map.get("key"));
-        hidden = Field.getBoolean(map.get("hidden"));
-        summary = Field.getString(map.get("summary"));
-        typeName = Field.getString(map.get("key"));
-        typeId = Field.getString(map.get("typeId"));
-        typeUrl = Field.getString(map.get("typeUrl"));
-        priorityUrl = Field.getString(map.get("priorityUrl"));
-        priorityName = Field.getString(map.get("priorityName"));
-        done = Field.getBoolean(map.get("done"));
-        assignee = Field.getString(map.get("assignee"));
-        assigneeName = Field.getString(map.get("assigneeName"));
-        avatarUrl = Field.getString(map.get("avatarUrl"));
-        colour = Field.getString(map.get("color"));
-        statusId = Field.getString(map.get("statusId"));
-        statusName = Field.getString(map.get("statusName"));
-        statusUrl = Field.getString(map.get("statusUrl"));
-        fixVersions = GreenHopperField.getIntegerArray(map.get("fixVersions"));
-        projectId = Field.getInteger(map.get("projectId"));
-    }
-
+    
     /**
-     * Retrieves the full JIRA issue.
-     *
-     * @return an Issue
-     *
-     * @throws JiraException when the retrieval fails
+     * @param data Map of the JSON payload
      */
-    public Issue getJiraIssue() throws JiraException {
-        return Issue.get(restclient, key);
-    }
+    @Override
+	protected void deserialise(Map<String, Object> data) throws JiraException {
+    	hidden = GreenHopperField.getBoolean(data.get("hidden"));
+        summary = GreenHopperField.getString(data.get("summary"));
+        typeName = GreenHopperField.getString(data.get("key"));
+        typeId = GreenHopperField.getString(data.get("typeId"));
+        typeUrl = GreenHopperField.getString(data.get("typeUrl"));
+        priorityUrl = GreenHopperField.getString(data.get("priorityUrl"));
+        priorityName = GreenHopperField.getString(data.get("priorityName"));
+        done = GreenHopperField.getBoolean(data.get("done"));
+        assignee = GreenHopperField.getString(data.get("assignee"));
+        assigneeName = GreenHopperField.getString(data.get("assigneeName"));
+        avatarUrl = GreenHopperField.getString(data.get("avatarUrl"));
+        colour = GreenHopperField.getString(data.get("color"));
+        statusId = GreenHopperField.getString(data.get("statusId"));
+        statusName = GreenHopperField.getString(data.get("statusName"));
+        statusUrl = GreenHopperField.getString(data.get("statusUrl"));
+        fixVersions = GreenHopperField.getIntegerArray(data.get("fixVersions"));
+        projectId = GreenHopperField.getInteger(data.get("projectId"));
+	}
 
     @Override
     public String toString() {
         return key;
     }
-
-    public String getKey() {
-        return key;
-    }
-
+    
     public Boolean isHidden() {
         return hidden;
     }
@@ -178,4 +158,3 @@ public abstract class GreenHopperIssue extends GreenHopperResource {
         return projectId;
     }
 }
-

@@ -1,15 +1,16 @@
 package net.rcarz.jiraclient;
 
-import net.sf.json.JSONObject;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
+
+import org.junit.Test;
 
 public class UserTest {
 
@@ -21,14 +22,14 @@ public class UserTest {
     private String self = "https://brainbubble.atlassian.net/rest/api/2/user?username=joseph";
 
     @Test
-    public void testJSONDeserializer() throws IOException, URISyntaxException {
-        User user = new User(new RestClient(null, new URI("/123/asd")), getTestJSON());
+    public void testJSONDeserializer() throws IOException, URISyntaxException, JiraException {
+        User user = new User(getTestData());
         assertEquals(user.getName(), username);
         assertEquals(user.getDisplayName(), displayName);
         assertEquals(user.getEmail(), email);
         assertEquals(user.getId(), userID);
 
-        Map<String, String> avatars = user.getAvatarUrls();
+        Map<String, Object> avatars = user.getAvatarUrls();
 
         assertEquals("https://secure.gravatar.com/avatar/a5a271f9eee8bbb3795f41f290274f8c?d=mm&s=16", avatars.get("16x16"));
         assertEquals("https://secure.gravatar.com/avatar/a5a271f9eee8bbb3795f41f290274f8c?d=mm&s=24", avatars.get("24x24"));
@@ -38,7 +39,7 @@ public class UserTest {
         assertTrue(user.isActive());
     }
 
-    private JSONObject getTestJSON() {
+    private Map<String, Object> getTestData() throws JSONException, JiraException {
         JSONObject json = new JSONObject();
 
         json.put("name", username);
@@ -56,12 +57,12 @@ public class UserTest {
         json.put("avatarUrls", images);
         json.put("id", "10");
 
-        return json;
+        return RestClient.JSONtoMap(json);
     }
 
     @Test
-    public void testStatusToString() throws URISyntaxException {
-        User user = new User(new RestClient(null, new URI("/123/asd")), getTestJSON());
+    public void testStatusToString() throws URISyntaxException, JiraException {
+        User user = new User(getTestData());
         assertEquals(username, user.toString());
     }
 }

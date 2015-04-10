@@ -1,21 +1,25 @@
 package net.rcarz.jiraclient;
 
-import net.sf.json.JSONObject;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+
+import java.util.Map;
+
+import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
+
+import org.junit.Test;
 
 public class VersionTest {
 
     @Test
-    public void testVersionInit(){
-        Version version = new Version(null,null);
+    public void testVersionInit() throws JiraException{
+        new Version(null);
     }
 
     @Test
-    public void testVersionJSON(){
-        Version version = new Version(null,getTestJSON());
+    public void testVersionJSON() throws JiraException{
+        Version version = new Version(getTestData());
 
         assertEquals(version.getId(),"10200");
         assertEquals(version.getName(),"1.0");
@@ -26,12 +30,12 @@ public class VersionTest {
     }
 
     @Test
-    public void testVersionToString(){
-        Version version = new Version(null,getTestJSON());
+    public void testVersionToString() throws JiraException{
+        Version version = new Version(getTestData());
         assertEquals(version.toString(),"1.0");
     }
 
-    private JSONObject getTestJSON() {
+    private Map<String, Object> getTestData() throws JSONException, JiraException {
         JSONObject jsonObject = new JSONObject();
 
         jsonObject.put("id","10200");
@@ -40,7 +44,7 @@ public class VersionTest {
         jsonObject.put("archived",false);
         jsonObject.put("released",false);
         jsonObject.put("releaseDate","2013-12-01");
-        return jsonObject;
+        return RestClient.JSONtoMap(jsonObject);
     }
 }
 

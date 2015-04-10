@@ -27,9 +27,15 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
@@ -58,7 +64,7 @@ import org.apache.http.entity.mime.content.InputStreamBody;
  * A simple REST client that speaks JSON.
  */
 public class RestClient {
-
+    
     private HttpClient httpClient = null;
     private ICredentials creds = null;
     private URI uri = null;
@@ -85,7 +91,7 @@ public class RestClient {
         this.creds = creds;
         this.uri = uri;
     }
-
+    
     /**
      * Build a URI from a path.
      *
@@ -95,8 +101,8 @@ public class RestClient {
      *
      * @throws URISyntaxException when the path is invalid
      */
-    public URI buildURI(String path) throws URISyntaxException {
-        return buildURI(path, null);
+    public URI buildURI(String... pathParts) throws URISyntaxException {
+        return buildURI(null, pathParts);
     }
 
     /**
@@ -109,8 +115,12 @@ public class RestClient {
      *
      * @throws URISyntaxException when the path is invalid
      */
-    public URI buildURI(String path, Map<String, String> params) throws URISyntaxException {
+    public URI buildURI(Map<String, String> params, String... pathParts) throws URISyntaxException {
         URIBuilder ub = new URIBuilder(uri);
+        String path = "";
+        for (String part : pathParts) {
+        	path += "/" + part;
+        }
         ub.setPath(ub.getPath() + path);
 
         if (params != null) {
@@ -173,8 +183,8 @@ public class RestClient {
         return result.length() > 0 ? JSONSerializer.toJSON(result.toString()): null;
     }
 
-    private JSON request(HttpEntityEnclosingRequestBase req, String payload)
-        throws RestException, IOException, AuthenticationException {
+    private JSON request(HttpEntityEnclosingRequestBase req, String payload) 
+    		throws RestException, IOException, AuthenticationException {
 
         if (payload != null) {
             StringEntity ent = null;
@@ -193,9 +203,10 @@ public class RestClient {
         return request(req);
     }
     
-    private JSON request(HttpEntityEnclosingRequestBase req, File file)
-        throws RestException, IOException, AuthenticationException {
-        if (file != null) {
+    private JSON request(HttpEntityEnclosingRequestBase req, File file) 
+    		throws RestException, IOException, AuthenticationException {
+        
+    	if (file != null) {
             File fileUpload = file;
             req.setHeader("X-Atlassian-Token", "nocheck");
             MultipartEntityBuilder ent = MultipartEntityBuilder.create();
@@ -205,9 +216,10 @@ public class RestClient {
         return request(req);
     }
 
-    private JSON request(HttpEntityEnclosingRequestBase req, Issue.NewAttachment... attachments)
-        throws RestException, IOException, AuthenticationException {
-        if (attachments != null) {
+    private JSON request(HttpEntityEnclosingRequestBase req, Issue.NewAttachment... attachments) 
+    		throws RestException, IOException, AuthenticationException {
+        
+    	if (attachments != null) {
             req.setHeader("X-Atlassian-Token", "nocheck");
             MultipartEntityBuilder ent = MultipartEntityBuilder.create();
             for(Issue.NewAttachment attachment : attachments) {
@@ -232,8 +244,8 @@ public class RestClient {
         return request(req);
     }
 
-    private JSON request(HttpEntityEnclosingRequestBase req, JSON payload)
-        throws RestException, IOException, AuthenticationException {
+    private JSON request(HttpEntityEnclosingRequestBase req, JSON payload) 
+    		throws RestException, IOException, AuthenticationException {
 
         return request(req, payload != null ? payload.toString() : null);
     }
@@ -248,9 +260,12 @@ public class RestClient {
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
      * @throws AuthenticationException 
+     * @throws JiraException 
      */
-    public JSON delete(URI uri) throws RestException, IOException, AuthenticationException {
-        return request(new HttpDelete(uri));
+    public Map<String, Object> delete(URI uri) 
+    		throws RestException, IOException, AuthenticationException, JiraException {
+        
+    	return JSONtoMap(request(new HttpDelete(uri)));
     }
 
     /**
@@ -264,9 +279,18 @@ public class RestClient {
      * @throws IOException when an error reading the response occurs
      * @throws URISyntaxException when an error occurred appending the path to the URI
      * @throws AuthenticationException 
+     * @throws JiraException 
      */
-    public JSON delete(String path) throws RestException, IOException, URISyntaxException, AuthenticationException {
-        return delete(buildURI(path));
+    public Map<String, Object> delete(String... pathParts) 
+    		throws RestException, IOException, URISyntaxException, AuthenticationException, JiraException {
+        
+    	return delete(buildURI(pathParts));
+    }
+    
+    public Map<String, Object> delete(Map<String, String> params, String... pathParts) 
+    		throws RestException, IOException, URISyntaxException, AuthenticationException, JiraException {
+        
+    	return delete(buildURI(params, pathParts));
     }
 
     /**
@@ -279,9 +303,12 @@ public class RestClient {
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
      * @throws AuthenticationException 
+     * @throws JiraException 
      */
-    public JSON get(URI uri) throws RestException, IOException, AuthenticationException {
-        return request(new HttpGet(uri));
+    public Map<String, Object> get(URI uri) 
+    		throws RestException, IOException, AuthenticationException, JiraException {
+        
+    	return JSONtoMap(request(new HttpGet(uri)));
     }
 
     /**
@@ -296,9 +323,12 @@ public class RestClient {
      * @throws IOException when an error reading the response occurs
      * @throws URISyntaxException when an error occurred appending the path to the URI
      * @throws AuthenticationException 
+     * @throws JiraException 
      */
-    public JSON get(String path, Map<String, String> params) throws RestException, IOException, URISyntaxException, AuthenticationException {
-        return get(buildURI(path, params));
+    public Map<String, Object> get(Map<String, String> params, String... pathParts) 
+    		throws RestException, IOException, URISyntaxException, AuthenticationException, JiraException {
+        
+    	return get(buildURI(params, pathParts));
     }
 
     /**
@@ -312,9 +342,12 @@ public class RestClient {
      * @throws IOException when an error reading the response occurs
      * @throws URISyntaxException when an error occurred appending the path to the URI
      * @throws AuthenticationException 
+     * @throws JiraException 
      */
-    public JSON get(String path) throws RestException, IOException, URISyntaxException, AuthenticationException {
-        return get(path, null);
+    public Map<String, Object> get(String... pathParts) 
+    		throws RestException, IOException, URISyntaxException, AuthenticationException, JiraException {
+        
+    	return get(null, pathParts);
     }
 
 
@@ -329,9 +362,12 @@ public class RestClient {
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
      * @throws AuthenticationException 
+     * @throws JiraException 
      */
-    public JSON post(URI uri, JSON payload) throws RestException, IOException, AuthenticationException {
-        return request(new HttpPost(uri), payload);
+    public Map<String, Object> post(URI uri, JSON payload) 
+    		throws RestException, IOException, AuthenticationException, JiraException {
+        
+    	return JSONtoMap(request(new HttpPost(uri), payload));
     }
 
     /**
@@ -352,13 +388,16 @@ public class RestClient {
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
      * @throws AuthenticationException 
+     * @throws JiraException 
      */
-    public JSON post(URI uri, String payload) throws RestException, IOException, AuthenticationException {
+    public Map<String, Object> post(URI uri, String payload) 
+    		throws RestException, IOException, AuthenticationException, JiraException {
+    	
     	String quoted = null;
-    	if(payload != null && !payload.equals(new JSONObject())){
+    	if (payload != null && !payload.equals(new JSONObject())) {
     		quoted = String.format("\"%s\"", payload);
     	}
-        return request(new HttpPost(uri), quoted);
+        return JSONtoMap(request(new HttpPost(uri), quoted));
     }
 
     /**
@@ -373,11 +412,12 @@ public class RestClient {
      * @throws IOException when an error reading the response occurs
      * @throws URISyntaxException when an error occurred appending the path to the URI
      * @throws AuthenticationException 
+     * @throws JiraException 
      */
-    public JSON post(String path, JSON payload)
-        throws RestException, IOException, URISyntaxException, AuthenticationException {
-
-        return post(buildURI(path), payload);
+    public Map<String, Object> post(JSON payload, String... pathParts) 
+    		throws RestException, IOException, URISyntaxException, AuthenticationException, JiraException {
+        
+    	return post(buildURI(pathParts), payload);
     }
     
     /**
@@ -391,11 +431,12 @@ public class RestClient {
      * @throws IOException when an error reading the response occurs
      * @throws URISyntaxException when an error occurred appending the path to the URI
      * @throws AuthenticationException 
+     * @throws JiraException 
      */
-    public JSON post(String path)
-        throws RestException, IOException, URISyntaxException, AuthenticationException {
-    	
-        return post(buildURI(path), new JSONObject());
+    public Map<String, Object> post(String... pathParts) 
+    		throws RestException, IOException, URISyntaxException, AuthenticationException, JiraException {
+        
+    	return post(buildURI(pathParts), new JSONObject());
     }
     
     /**
@@ -408,9 +449,12 @@ public class RestClient {
      * @throws IOException 
      * @throws RestException 
      * @throws AuthenticationException 
+     * @throws JiraException 
      */
-    public JSON post(String path, File file) throws RestException, IOException, URISyntaxException, AuthenticationException{
-        return request(new HttpPost(buildURI(path)), file);
+    public Map<String, Object> post(File file, String... pathParts) 
+    		throws RestException, IOException, URISyntaxException, AuthenticationException, JiraException {
+        
+    	return JSONtoMap(request(new HttpPost(buildURI(pathParts)), file));
     }
 
     /**
@@ -423,11 +467,12 @@ public class RestClient {
      * @throws IOException
      * @throws RestException
      * @throws AuthenticationException 
+     * @throws JiraException 
      */
-    public JSON post(String path, Issue.NewAttachment... attachments)
-        throws RestException, IOException, URISyntaxException, AuthenticationException
-    {
-        return request(new HttpPost(buildURI(path)), attachments);
+    public Map<String, Object> post(URI uri, Issue.NewAttachment... attachments) 
+    		throws RestException, IOException, URISyntaxException, AuthenticationException, JiraException {
+        
+    	return JSONtoMap(request(new HttpPost(uri), attachments));
     }
 
     /**
@@ -441,9 +486,12 @@ public class RestClient {
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
      * @throws AuthenticationException 
+     * @throws JiraException 
      */
-    public JSON put(URI uri, JSON payload) throws RestException, IOException, AuthenticationException {
-        return request(new HttpPut(uri), payload);
+    public Map<String, Object> put(URI uri, JSON payload) 
+    		throws RestException, IOException, AuthenticationException, JiraException {
+        
+    	return JSONtoMap(request(new HttpPut(uri), payload));
     }
 
     /**
@@ -458,11 +506,12 @@ public class RestClient {
      * @throws IOException when an error reading the response occurs
      * @throws URISyntaxException when an error occurred appending the path to the URI
      * @throws AuthenticationException 
+     * @throws JiraException 
      */
-    public JSON put(String path, JSON payload)
-        throws RestException, IOException, URISyntaxException, AuthenticationException {
-
-        return put(buildURI(path), payload);
+    public Map<String, Object> put(JSON payload, String... pathParts) 
+    		throws RestException, IOException, URISyntaxException, AuthenticationException, JiraException {
+        
+    	return put(buildURI(pathParts), payload);
     }
     
     /**
@@ -473,5 +522,80 @@ public class RestClient {
     public HttpClient getHttpClient(){
         return this.httpClient;
     }
-}
+    
+    /**
+     * Takes a JSON object and converts it to a Map
+     * 
+     * @param JSONObject
+     * 
+     * @return Map
+     * 
+     * @throws JSONException
+     * @throws JiraException
+     */
+    public static Map<String, Object> JSONtoMap(Object object) throws JSONException, JiraException {
+        Map<String, Object> map = new HashMap<String, Object>();
 
+        if (object instanceof JSONArray) {
+    		map.put("data", JSONtoList(object));
+        } else {
+	        if (!(object instanceof JSONObject)) {
+	            throw new JiraException("JSON payload is malformed");
+	        }
+	        
+	        JSONObject jsonMap = (JSONObject) object;
+	        
+	        if (jsonMap.isNullObject()) {
+	            throw new JiraException("JSON payload is empty");
+	        }
+	        
+	        Iterator<?> keysItr = jsonMap.keys();
+	        while (keysItr.hasNext()) {
+	            String key = (String)keysItr.next();
+	            Object value = jsonMap.get(key);
+	
+	            if (value instanceof JSONArray) {
+	                value = JSONtoList(value);
+	            } else if (value instanceof JSONObject) {
+	                value = JSONtoMap(value);
+	            }
+	            
+	            map.put(key, value);
+	        }
+        }
+        
+        return map;
+    }
+
+    /**
+     * Takes a JSON array and converts it to a List
+     * 
+     * @param JSONArray
+     * 
+     * @return List
+     * 
+     * @throws JSONException
+     * @throws JiraException
+     */
+    private static List<Object> JSONtoList(Object object) throws JSONException, JiraException {
+        List<Object> list = new ArrayList<Object>();
+        
+        if (!(object instanceof JSONArray)) {
+        	throw new JiraException("JSON payload is malformed");
+        }
+        
+        JSONArray jsonArray = (JSONArray) object;
+        
+        for (Object value : jsonArray) {
+            if (value instanceof JSONArray) {
+                value = JSONtoList(value);
+            } else if (value instanceof JSONObject) {
+                value = JSONtoMap(value);
+            }
+            
+            list.add(value);
+        }
+        
+        return list;
+    }
+}

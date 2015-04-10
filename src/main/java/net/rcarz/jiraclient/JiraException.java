@@ -25,10 +25,6 @@ import java.lang.Throwable;
  * A generic JIRA client exception.
  */
 public class JiraException extends Exception {
-
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public JiraException(String msg) {
@@ -39,4 +35,3 @@ public class JiraException extends Exception {
         super(msg, cause);
     }
 }
-

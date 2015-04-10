@@ -69,6 +69,4 @@ public class BasicCredentials implements ICredentials {
 
     public void logout(RestClient client) throws JiraException {
     }
-    
 }
-

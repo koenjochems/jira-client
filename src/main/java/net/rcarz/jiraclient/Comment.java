@@ -19,9 +19,6 @@
 
 package net.rcarz.jiraclient;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
-
 import java.util.Date;
 import java.util.Map;
 
@@ -30,6 +27,8 @@ import java.util.Map;
  */
 public class Comment extends Resource {
 
+	public static final String URI = "comment";
+	
     private User author = null;
     private String body = null;
     private Date created = null;
@@ -39,55 +38,28 @@ public class Comment extends Resource {
     /**
      * Creates a comment from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected Comment(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected Comment(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
-    }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        self = Field.getString(map.get("self"));
-        id = Field.getString(map.get("id"));
-        author = Field.getResource(User.class, map.get("author"), restclient);
-        body = Field.getString(map.get("body"));
-        created = Field.getDateTime(map.get("created"));
-        updated = Field.getDateTime(map.get("updated"));
-        updatedAuthor = Field.getResource(User.class, map.get("updatedAuthor"), restclient);
-    }
-
-    /**
-     * Retrieves the given comment record.
-     *
-     * @param restclient REST client instance
-     * @param issue Internal JIRA ID of the associated issue
-     * @param id Internal JIRA ID of the comment
-     *
-     * @return a comment instance
-     *
-     * @throws JiraException when the retrieval fails
-     */
-    public static Comment get(RestClient restclient, String issue, String id)
-        throws JiraException {
-
-        JSON result = null;
-
-        try {
-            result = restclient.get(getBaseUri() + "issue/" + issue + "/comment/" + id);
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve comment " + id + " on issue " + issue, ex);
+        if (data != null) {
+        	deserialise(data);
         }
-
-        if (!(result instanceof JSONObject))
-            throw new JiraException("JSON payload is malformed");
-
-        return new Comment(restclient, (JSONObject)result);
     }
+    
+    /**
+     * @param data Map of the JSON payload
+     */
+    @Override
+	protected void deserialise(Map<String, Object> data) throws JiraException {
+    	author = Field.getResource(User.class, data.get("author"));
+        body = Field.getString(data.get("body"));
+        created = Field.getDateTime(data.get("created"));
+        updated = Field.getDateTime(data.get("updated"));
+        updatedAuthor = Field.getResource(User.class, data.get("updatedAuthor"));
+	}
 
     @Override
     public String toString() {
@@ -114,4 +86,3 @@ public class Comment extends Resource {
         return updated;
     }
 }
-

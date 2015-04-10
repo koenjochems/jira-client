@@ -19,9 +19,6 @@
 
 package net.rcarz.jiraclient;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
-
 import java.util.Map;
 
 /**
@@ -29,7 +26,8 @@ import java.util.Map;
  */
 public class Version extends Resource {
 
-    private String name = null;
+	public static final String URI = "version";
+	
     private boolean archived = false;
     private boolean released = false;
     private String releaseDate;
@@ -38,106 +36,26 @@ public class Version extends Resource {
     /**
      * Creates a version from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json       JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected Version(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected Version(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
+        if (data != null) {
+            deserialise(data);
+        }
     }
     
     /**
-     * Merges the given version with current version
-     * 
-     * @param version
-     *            The version to merge
+     * @param data Map of the JSON payload
      */
-    public void mergeWith(Version version) {
-    
-        JSONObject req = new JSONObject();
-        req.put("description", version.getDescription());
-        req.put("name", version.getName());
-        req.put("archived", version.isArchived());
-        req.put("released", version.isReleased());
-        req.put("releaseDate", version.getReleaseDate());
-
-        try {
-            restclient.put(Resource.getBaseUri() + "version/" + id, req);
-        } catch (Exception ex) {
-            throw new RuntimeException("Failed to merge", ex);
-        }
-    }
-
-    /**
-    * Copies the version to the given project
-    * 
-    * @param project
-    *            The project the version will be copied to
-    */
-    public void copyTo(Project project) {
-    
-        JSONObject req = new JSONObject();
-        req.put("description", getDescription());
-        req.put("name", getName());
-        req.put("archived", isArchived());
-        req.put("released", isReleased());
-        req.put("releaseDate", getReleaseDate());
-        req.put("project", project.getKey());
-        req.put("projectId", project.getId());
-      
-        try {
-            restclient.post(Resource.getBaseUri() + "version/", req);
-        } catch (Exception ex) {
-            throw new RuntimeException("Failed to copy to project '" + project.getKey() + "'", ex);
-        }
-    }
-
-    /**
-     * Retrieves the given version record.
-     *
-     * @param restclient REST client instance
-     * @param id         Internal JIRA ID of the version
-     * @return a version instance
-     * @throws JiraException when the retrieval fails
-     */
-    public static Version get(RestClient restclient, String id)
-            throws JiraException {
-
-        JSON result = null;
-
-        try {
-            result = restclient.get(getBaseUri() + "version/" + id);
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve version " + id, ex);
-        }
-
-        if (!(result instanceof JSONObject))
-            throw new JiraException("JSON payload is malformed");
-
-        return new Version(restclient, (JSONObject) result);
-    }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        self = Field.getString(map.get("self"));
-        id = Field.getString(map.get("id"));
-        name = Field.getString(map.get("name"));
-        archived = Field.getBoolean(map.get("archived"));
-        released = Field.getBoolean(map.get("released"));
-        releaseDate = Field.getString(map.get("releaseDate"));
-        description = Field.getString(map.get("description"));
-    }
-
     @Override
-    public String toString() {
-        return getName();
-    }
-
-    public String getName() {
-        return name;
+    protected void deserialise(Map<String, Object> data) {
+        archived = Field.getBoolean(data.get("archived"));
+        released = Field.getBoolean(data.get("released"));
+        releaseDate = Field.getString(data.get("releaseDate"));
+        description = Field.getString(data.get("description"));
     }
 
     public boolean isArchived() {
@@ -154,7 +72,5 @@ public class Version extends Resource {
 
     public String getDescription() {
         return description;
-
     }
 }
-

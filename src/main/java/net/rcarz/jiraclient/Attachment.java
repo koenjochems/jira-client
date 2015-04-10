@@ -19,24 +19,17 @@
 
 package net.rcarz.jiraclient;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
-
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 
 /**
  * Represents an issue attachment.
  */
 public class Attachment extends Resource {
 
+	public static final String URI = "attachment";
+	public static final String URI_MULTI = "attachments";
+	
     private User author = null;
     private String filename = null;
     private Date created = null;
@@ -47,84 +40,30 @@ public class Attachment extends Resource {
     /**
      * Creates an attachment from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * 
+     * @throws JiraException 
      */
-    protected Attachment(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected Attachment(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
-    }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        self = Field.getString(map.get("self"));
-        id = Field.getString(map.get("id"));
-        author = Field.getResource(User.class, map.get("author"), restclient);
-        filename = Field.getString(map.get("filename"));
-        created = Field.getDate(map.get("created"));
-        size = Field.getInteger(map.get("size"));
-        mimeType = Field.getString(map.get("mimeType"));
-        content = Field.getString(map.get("content"));
-    }
-
-    /**
-     * Retrieves the given attachment record.
-     *
-     * @param restclient REST client instance
-     * @param id Internal JIRA ID of the attachment
-     *
-     * @return an attachment instance
-     *
-     * @throws JiraException when the retrieval fails
-     */
-    public static Attachment get(RestClient restclient, String id)
-        throws JiraException {
-
-        JSON result = null;
-
-        try {
-            result = restclient.get(getBaseUri() + "attachment/" + id);
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve attachment " + id, ex);
+        if (data != null) {
+        	deserialise(data);
         }
-
-        if (!(result instanceof JSONObject))
-            throw new JiraException("JSON payload is malformed");
-
-        return new Attachment(restclient, (JSONObject)result);
     }
-    
+
     /**
-     * Downloads attachment to byte array
-     *
-     * @return a byte[]
-     *
-     * @throws JiraException when the download fails
+     * @param data Map of the JSON payload
      */
-    public byte[] download() 
-    	throws JiraException{
-    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    	try{
-        	HttpGet get = new HttpGet(content);
-        	HttpResponse response = restclient.getHttpClient().execute(get);
-        	HttpEntity entity = response.getEntity();
-        	if (entity != null) {
-        	    InputStream inputStream = entity.getContent();
-        	    int next = inputStream.read();
-        	    while (next > -1) {
-        	        bos.write(next);
-        	        next = inputStream.read();
-        	    }
-        	    bos.flush();
-        	}
-    	}catch(IOException e){
-    		  throw new JiraException(String.format("Failed downloading attachment from %s: %s", this.content, e.getMessage()));
-    	}
-    	return bos.toByteArray();
-    }
+    @Override
+	protected void deserialise(Map<String, Object> data) throws JiraException {
+    	author = Field.getResource(User.class, data.get("author"));
+        filename = Field.getString(data.get("filename"));
+        created = Field.getDate(data.get("created"));
+        size = Field.getInteger(data.get("size"));
+        mimeType = Field.getString(data.get("mimeType"));
+        content = Field.getString(data.get("content"));
+	}
 
     @Override
     public String toString() {
@@ -155,4 +94,3 @@ public class Attachment extends Resource {
         return size;
     }
 }
-

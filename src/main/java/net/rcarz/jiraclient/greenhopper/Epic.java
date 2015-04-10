@@ -21,9 +21,7 @@ package net.rcarz.jiraclient.greenhopper;
 
 import java.util.Map;
 
-import net.rcarz.jiraclient.Field;
-import net.rcarz.jiraclient.RestClient;
-import net.sf.json.JSONObject;
+import net.rcarz.jiraclient.JiraException;
 
 /**
  * Represents a GreenHopper epic issue.
@@ -37,23 +35,26 @@ public class Epic extends GreenHopperIssue {
     /**
      * Creates an epic issue from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected Epic(RestClient restclient, JSONObject json) {
-        super(restclient, json);
+    protected Epic(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
+        if (data != null) {
+        	deserialise(data);
+        }
     }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        epicLabel = Field.getString(map.get("epicLabel"));
-        epicColour = Field.getString(map.get("epicColor"));
-        epicStats = GreenHopperField.getEpicStats(map.get("epicStats"));
-    }
+    
+    /**
+     * @param data Map of the JSON payload
+     */
+    @Override
+	protected void deserialise(Map<String, Object> data) throws JiraException {
+    	epicLabel = GreenHopperField.getString(data.get("epicLabel"));
+       	epicColour = GreenHopperField.getString(data.get("epicColor"));
+       	epicStats = GreenHopperField.getResource(EpicStats.class, data.get("epicStats"));
+	}
 
     public String getEpicLabel() {
         return epicLabel;
@@ -67,4 +68,3 @@ public class Epic extends GreenHopperIssue {
         return epicStats;
     }
 }
-

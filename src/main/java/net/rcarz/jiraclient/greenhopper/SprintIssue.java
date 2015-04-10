@@ -19,12 +19,9 @@
 
 package net.rcarz.jiraclient.greenhopper;
 
-import net.rcarz.jiraclient.Field;
-import net.rcarz.jiraclient.RestClient;
-
 import java.util.Map;
 
-import net.sf.json.JSONObject;
+import net.rcarz.jiraclient.JiraException;
 
 /**
  * Represents a GreenHopper sprint issue.
@@ -37,22 +34,25 @@ public class SprintIssue extends GreenHopperIssue {
     /**
      * Creates a sprint issue from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected SprintIssue(RestClient restclient, JSONObject json) {
-        super(restclient, json);
+    protected SprintIssue(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
+        if (data != null) {
+        	deserialise(data);
+        }
     }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        epic = Field.getString(map.get("epic"));
-        estimateStatistic = GreenHopperField.getEstimateStatistic(map.get("estimateStatistic"));
-    }
+    
+    /**
+     * @param data Map of the JSON payload
+     */
+    @Override
+	protected void deserialise(Map<String, Object> data) throws JiraException {
+    	epic = GreenHopperField.getString(data.get("epic"));
+        estimateStatistic = GreenHopperField.getResource(EstimateStatistic.class, data.get("estimateStatistic"));
+	}
 
     public String getEpic() {
         return epic;
@@ -62,4 +62,3 @@ public class SprintIssue extends GreenHopperIssue {
         return estimateStatistic;
     }
 }
-

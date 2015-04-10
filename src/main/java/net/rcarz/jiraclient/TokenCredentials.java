@@ -19,7 +19,8 @@
 
 package net.rcarz.jiraclient;
 
-import net.sf.json.JSON;
+import java.util.Map;
+
 import net.sf.json.JSONObject;
 
 import org.apache.http.HttpRequest;
@@ -69,13 +70,13 @@ public class TokenCredentials implements ICredentials {
     }
 
     public void initialize(RestClient client) throws JiraException {
-        if (token==null) {
+        if (token == null) {
             try {
             	JSONObject req = new JSONObject();
                 req.put("username", username);
                 req.put("password", password);
-                JSON json = client.post(Resource.getAuthUri() + "session", req);
-                System.out.println(json.toString());
+                Map<String, Object> result = client.post(req, JiraClient.getAuthUri(), "session");
+                System.out.println(result.toString());
             } catch (Exception ex) {
                 throw new JiraException("Failed to login", ex);
             }
@@ -85,7 +86,7 @@ public class TokenCredentials implements ICredentials {
     public void logout(RestClient client) throws JiraException {
         if (token != null) {
            try {
-                client.delete(Resource.getAuthUri() + "session");
+                client.delete(JiraClient.getAuthUri() + "session");
             } catch (Exception e) {
                 throw new JiraException("Failed to logout", e);
             }

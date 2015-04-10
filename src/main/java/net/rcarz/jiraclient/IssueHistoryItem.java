@@ -2,8 +2,6 @@ package net.rcarz.jiraclient;
 
 import java.util.Map;
 
-import net.sf.json.JSONObject;
-
 public class IssueHistoryItem extends Resource {
 
     private String field;
@@ -12,28 +10,31 @@ public class IssueHistoryItem extends Resource {
     private String fromStr;
     private String toStr;
 
-    public IssueHistoryItem(RestClient restclient) {
-        super(restclient);
-    }
-
-    public IssueHistoryItem(RestClient restclient, JSONObject json) {
-        this(restclient);
-        if (json != null) {
-            deserialise(restclient,json);
+    /**
+     * 
+     * @param data Map of the JSON payload
+     * 
+     * @throws JiraException
+     */
+    public IssueHistoryItem(Map<String, Object> data) throws JiraException {
+        super(data);
+        
+        if (data != null) {
+        	deserialise(data);
         }
     }
-
-    private void deserialise(RestClient restclient, JSONObject json) {
-        Map<?, ?> map = json;
-        
-        self = Field.getString(map.get("self"));
-        id = Field.getString(map.get("id"));
-        field = Field.getString(map.get("field"));
-        from = Field.getString(map.get("from"));
-        to = Field.getString(map.get("to"));
-        fromStr = Field.getString(map.get("fromString"));
-        toStr = Field.getString(map.get("toString"));
-    }
+    
+    /**
+     * @param data Map of the JSON payload
+     */
+    @Override
+	protected void deserialise(Map<String, Object> data) {
+    	field = Field.getString(data.get("field"));
+        from = Field.getString(data.get("from"));
+        to = Field.getString(data.get("to"));
+        fromStr = Field.getString(data.get("fromString"));
+        toStr = Field.getString(data.get("toString"));
+	}
 
     public String getField() {
         return field;
@@ -54,5 +55,4 @@ public class IssueHistoryItem extends Resource {
     public String getToStr() {
         return toStr;
     }
-    
 }

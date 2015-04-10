@@ -22,8 +22,6 @@ package net.rcarz.jiraclient;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.json.JSONObject;
-
 /**
  * Issue change log.
  */
@@ -36,26 +34,24 @@ public class ChangeLog extends Resource {
     /**
      * Creates a change log from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected ChangeLog(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected ChangeLog(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
+        if (data != null) {
+        	deserialise(data);
+        }
     }
-
+    
     /**
-     * Deserializes a change log from a json payload.
-     * @param json the json payload
+     * @param data Map of the JSON payload
      */
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        entries = Field.getResourceArray(ChangeLogEntry.class, map.get(
-                Field.CHANGE_LOG_ENTRIES), restclient);
-    }
+    @Override
+	protected void deserialise(Map<String, Object> data) throws JiraException {
+    	entries = Field.getResourceArray(ChangeLogEntry.class, data.get(Field.CHANGE_LOG_ENTRIES));
+	}
 
     /**
      * Returns the list of change log entries in the change log.

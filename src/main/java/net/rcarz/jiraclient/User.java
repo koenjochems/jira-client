@@ -19,10 +19,6 @@
 
 package net.rcarz.jiraclient;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
-
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -30,63 +26,36 @@ import java.util.Map;
  */
 public class User extends Resource {
 
+	public static final String URI = "user";
+	
     private boolean active = false;
-    private Map<String, String> avatarUrls = null;
+    private Map<String, Object> avatarUrls = null;
     private String displayName = null;
     private String email = null;
-    private String name = null;
 
     /**
      * Creates a user from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json       JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected User(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected User(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
+        if (data != null) {
+            deserialise(data);
+        }
     }
 
     /**
-     * Retrieves the given user record.
-     *
-     * @param restclient REST client instance
-     * @param username   User logon name
-     * @return a user instance
-     * @throws JiraException when the retrieval fails
+     * @param data Map of the JSON payload
      */
-    public static User get(RestClient restclient, String username)
-            throws JiraException {
-
-        JSON result = null;
-
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("username", username);
-
-        try {
-            result = restclient.get(getBaseUri() + "user", params);
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve user " + username, ex);
-        }
-
-        if (!(result instanceof JSONObject))
-            throw new JiraException("JSON payload is malformed");
-
-        return new User(restclient, (JSONObject) result);
-    }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        self = Field.getString(map.get("self"));
-        id = Field.getString(map.get("id"));
-        active = Field.getBoolean(map.get("active"));
-        avatarUrls = Field.getMap(String.class, String.class, map.get("avatarUrls"));
-        displayName = Field.getString(map.get("displayName"));
-        email = getEmailFromMap(map);
-        name = Field.getString(map.get("name"));
+    @Override
+    protected void deserialise(Map<String, Object> data) {
+        active = Field.getBoolean(data.get("active"));
+        avatarUrls = Field.getMap(data.get("avatarUrls"));
+        displayName = Field.getString(data.get("displayName"));
+        email = getEmailFromMap(data);
     }
 
     /**
@@ -95,24 +64,19 @@ public class User extends Resource {
      * @param map JSON object for the User
      * @return String email address of the JIRA user.
      */
-    private String getEmailFromMap(Map<?, ?> map) {
-        if (map.containsKey("email")) {
-            return Field.getString(map.get("email"));
+    private String getEmailFromMap(Map<String, Object> data) {
+        if (data.containsKey("email")) {
+            return Field.getString(data.get("email"));
         } else {
-            return Field.getString(map.get("emailAddress"));
+            return Field.getString(data.get("emailAddress"));
         }
     }
-
-    @Override
-    public String toString() {
-        return getName();
-    }
-
+    
     public boolean isActive() {
         return active;
     }
 
-    public Map<String, String> getAvatarUrls() {
+    public Map<String, Object> getAvatarUrls() {
         return avatarUrls;
     }
 
@@ -123,9 +87,4 @@ public class User extends Resource {
     public String getEmail() {
         return email;
     }
-
-    public String getName() {
-        return name;
-    }
 }
-

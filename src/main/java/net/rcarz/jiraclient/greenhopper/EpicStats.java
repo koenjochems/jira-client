@@ -19,16 +19,14 @@
 
 package net.rcarz.jiraclient.greenhopper;
 
-import net.rcarz.jiraclient.Field;
-
 import java.util.Map;
 
-import net.sf.json.JSONObject;
+import net.rcarz.jiraclient.JiraException;
 
 /**
  * GreenHopper epic statistics.
  */
-public class EpicStats {
+public class EpicStats extends GreenHopperResource {
 
     private Double notDoneEstimate = null;
     private Double doneEstimate = null;
@@ -40,18 +38,29 @@ public class EpicStats {
     /**
      * Creates an estimate sum from a JSON payload.
      *
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected EpicStats(JSONObject json) {
-        Map<?, ?> map = json;
-
-        notDoneEstimate = Field.getDouble(map.get("notDoneEstimate"));
-        doneEstimate = Field.getDouble(map.get("doneEstimate"));
-        estimated = Field.getInteger(map.get("estimated"));
-        notEstimated = Field.getInteger(map.get("notEstimated"));
-        notDone = Field.getInteger(map.get("notDone"));
-        done = Field.getInteger(map.get("done"));
+    protected EpicStats(Map<String, Object> data) throws JiraException {
+    	super(data);
+    	
+    	if (data != null) {
+    		deserialise(data);
+    	}
     }
+    
+    /**
+     * @param data Map of the JSON payload
+     */
+    @Override
+	protected void deserialise(Map<String, Object> data) {
+    	notDoneEstimate = GreenHopperField.getDouble(data.get("notDoneEstimate"));
+   		doneEstimate = GreenHopperField.getDouble(data.get("doneEstimate"));
+       	estimated = GreenHopperField.getInteger(data.get("estimated"));
+       	notEstimated = GreenHopperField.getInteger(data.get("notEstimated"));
+       	notDone = GreenHopperField.getInteger(data.get("notDone"));
+       	done = GreenHopperField.getInteger(data.get("done"));
+	}
 
     public Double getNotDoneEstimate() {
         return notDoneEstimate;
@@ -77,4 +86,3 @@ public class EpicStats {
         return done;
     }
 }
-

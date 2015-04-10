@@ -21,85 +21,44 @@ package net.rcarz.jiraclient;
 
 import java.util.Map;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
-
 /**
  * Represents an issue type.
  */
 public class IssueType extends Resource {
 
+	public static final String URI = "issuetype";
     private String description = null;
     private String iconUrl = null;
-    private String name = null;
     private boolean subtask = false;
-    private JSONObject fields = null;
+    private Map<String, Object> fields = null;
 
     /**
      * Creates an issue type from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected IssueType(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected IssueType(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
-    }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        self = Field.getString(map.get("self"));
-        id = Field.getString(map.get("id"));
-        description = Field.getString(map.get("description"));
-        iconUrl = Field.getString(map.get("iconUrl"));
-        name = Field.getString(map.get("name"));
-        subtask = Field.getBoolean(map.get("subtask"));
-
-        if (map.containsKey("fields") && map.get("fields") instanceof JSONObject)
-            fields = (JSONObject)map.get("fields");
-    }
-
-    /**
-     * Retrieves the given issue type record.
-     *
-     * @param restclient REST client instance
-     * @param id Internal JIRA ID of the issue type
-     *
-     * @return an issue type instance
-     *
-     * @throws JiraException when the retrieval fails
-     */
-    public static IssueType get(RestClient restclient, String id)
-        throws JiraException {
-
-        JSON result = null;
-
-        try {
-            result = restclient.get(getBaseUri() + "issuetype/" + id);
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve issue type " + id, ex);
+        if (data != null) {
+        	deserialise(data);
         }
-
-        if (!(result instanceof JSONObject))
-            throw new JiraException("JSON payload is malformed");
-
-        return new IssueType(restclient, (JSONObject)result);
     }
-
+    
+    /**
+     * @param data Map of the JSON payload
+     */
     @Override
-    public String toString() {
-        return getName();
-    }
+	protected void deserialise(Map<String, Object> data) {
+    	description = Field.getString(data.get("description"));
+        iconUrl = Field.getString(data.get("iconUrl"));
+        subtask = Field.getBoolean(data.get("subtask"));
+        fields = Field.getMap(data.get("fields"));
+	}
 
     public String getDescription() {
         return description;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String getIconUrl() {
@@ -110,8 +69,7 @@ public class IssueType extends Resource {
         return subtask;
     }
 
-    public JSONObject getFields() {
+    public Map<String, Object> getFields() {
         return fields;
     }
 }
-

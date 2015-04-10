@@ -1,51 +1,45 @@
 package net.rcarz.jiraclient;
 
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Map;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
+
+import org.junit.Test;
 
 public class TransitionTest {
 
     @Test
-    public void TransitionInit(){
-        Transition transition = new Transition(null, getTestJson());
+    public void TransitionInit() throws JiraException{
+        new Transition(getTestData());
     }
 
     @Test
-    public void testDeserializeJSON(){
-        Transition transition = new Transition(null, getTestJson());
+    public void testDeserializeJSON() throws JiraException{
+        Transition transition = new Transition(getTestData());
         assertEquals("21", transition.getId());
         assertEquals("Done", transition.getName());
     }
 
     @Test
-    public void testToStatus() {
-        Transition transition = new Transition(null, getTestJson());
+    public void testToStatus() throws JiraException {
+        Transition transition = new Transition(getTestData());
         Status toStatus = transition.getToStatus();
         assertEquals("Done", toStatus.getName());
         assertEquals("A description of great importance.", toStatus.getDescription());
     }
 
     @Test
-    public void testTransitionToString() throws URISyntaxException {
-        Transition transition = new Transition(new RestClient(null, new URI("/123/asd")), getTestJson());
+    public void testTransitionToString() throws URISyntaxException, JiraException {
+        Transition transition = new Transition(getTestData());
         assertEquals("Done", transition.toString());
     }
 
-    public static JSONObject getTestJson() {
+    public static Map<String, Object> getTestData() throws JSONException, JiraException {
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(
                 "{\n" +
                         "  \"id\": \"21\",\n" +
@@ -129,7 +123,6 @@ public class TransitionTest {
                         "  }\n" +
                         "}");
 
-        return  jsonObject;
+        return RestClient.JSONtoMap(jsonObject);
     }
-
 }

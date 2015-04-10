@@ -1,14 +1,19 @@
 package net.rcarz.jiraclient;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
 public class TimeTrackingTest {
 
-    private Issue issue = new Issue(null, Utils.getTestIssue());
-    private TimeTracking time = issue.getTimeTracking();
+    private Issue issue = null;
+    private TimeTracking time = null;
 
+    public TimeTrackingTest() throws JiraException {
+    	issue = new Issue(Utils.getTestIssue());
+        time = issue.getTimeTracking();
+    }
+    
     @Test
     public void testAttributeMappings() {
         assertEquals("1w", time.getOriginalEstimate());
@@ -20,5 +25,4 @@ public class TimeTrackingTest {
         assertEquals("3d", time.getTimeSpent());
         assertEquals(86400, time.getTimeSpentSeconds());
     }
-
 }

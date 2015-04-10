@@ -23,11 +23,8 @@ package net.rcarz.jiraclient;
  * An exception for JIRA REST errors.
  */
 public class RestException extends Exception {
-
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+	
 	private int status;
     private String result;
 
@@ -50,4 +47,3 @@ public class RestException extends Exception {
         return String.format("%s %s: %s", Integer.toString(status), super.getMessage(), result);
     }
 }
-

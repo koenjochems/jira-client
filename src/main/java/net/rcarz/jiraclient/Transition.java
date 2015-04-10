@@ -21,48 +21,37 @@ package net.rcarz.jiraclient;
 
 import java.util.Map;
 
-import net.sf.json.JSONObject;
-
 /**
  * Represents an issue priority.
  */
 public class Transition extends Resource {
 
-    private String name = null;
+	public static final String URI = "transitions";
+	
     private Status toStatus = null;
-    private Map<?, ?> fields = null;
+    private Map<String, Object> fields = null;
 
     /**
      * Creates a priority from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected Transition(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected Transition(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
+        if (data != null) {
+            deserialise(data);
+        }
     }
 
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        self = Field.getString(map.get("self"));
-        id = Field.getString(map.get("id"));
-        name = Field.getString(map.get("name"));
-        toStatus = Field.getResource(Status.class, map.get(Field.TRANSITION_TO_STATUS), restclient);
-
-        fields = (Map<?, ?>)map.get("fields");
-    }
-
+    /**
+     * @param data Map of the JSON payload
+     */
     @Override
-    public String toString() {
-        return getName();
-    }
-
-    public String getName() {
-        return name;
+	protected void deserialise(Map<String, Object> data) throws JiraException {
+	    toStatus = Field.getResource(Status.class, data.get(Field.TRANSITION_TO_STATUS));
+        fields = Field.getMap(data.get("fields"));
     }
 
     public Status getToStatus() {
@@ -72,6 +61,4 @@ public class Transition extends Resource {
     public Map<?, ?> getFields() {
         return fields;
     }
-
 }
-

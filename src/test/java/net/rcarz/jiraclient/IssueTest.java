@@ -1,7 +1,7 @@
 package net.rcarz.jiraclient;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
@@ -17,21 +17,21 @@ public class IssueTest {
 
     /**
      * If no exception thrown the test is passed.
+     * @throws JiraException 
      */
     @Test
-    public void testCreateIssue() {
-        new Issue(null, Utils.getTestIssue());
+    public void testCreateIssue() throws JiraException {
+        new Issue(Utils.getTestIssue());
     }
 
     @Test
-    public void testGetIssueStatus() {
-
+    public void testGetIssueStatus() throws JiraException {
         String statusName = "To Do";
         String statusID = "10004";
         String description = "Issue is currently in progress.";
         String iconURL = "https://brainbubble.atlassian.net/images/icons/statuses/open.png";
 
-        Issue issue = new Issue(null, Utils.getTestIssue());
+        Issue issue = new Issue(Utils.getTestIssue());
         assertNotNull(issue.getStatus());
         assertEquals(description, issue.getStatus().getDescription());
         assertEquals(iconURL, issue.getStatus().getIconUrl());
@@ -41,8 +41,8 @@ public class IssueTest {
     }
 
     @Test
-    public void getReporter() {
-        Issue issue = new Issue(null, Utils.getTestIssue());
+    public void getReporter() throws JiraException {
+        Issue issue = new Issue(Utils.getTestIssue());
         assertNotNull(issue.getReporter());
 
         User reporter = issue.getReporter();
@@ -52,7 +52,7 @@ public class IssueTest {
         assertTrue(reporter.isActive());
         assertEquals(reporter.getEmail(), "joseph.b.mccarthy2012@googlemail.com");
 
-        Map<String, String> avatars = reporter.getAvatarUrls();
+        Map<String, Object> avatars = reporter.getAvatarUrls();
 
         assertNotNull(avatars);
         assertEquals(avatars.size(), 4);
@@ -64,8 +64,8 @@ public class IssueTest {
     }
 
     @Test
-    public void testGetIssueType(){
-        Issue issue = new Issue(null, Utils.getTestIssue());
+    public void testGetIssueType() throws JiraException{
+        Issue issue = new Issue(Utils.getTestIssue());
         IssueType issueType = issue.getIssueType();
         assertNotNull(issueType);
 
@@ -77,8 +77,8 @@ public class IssueTest {
     }
 
     @Test
-    public void testGetVotes(){
-        Issue issue = new Issue(null, Utils.getTestIssue());
+    public void testGetVotes() throws JiraException{
+        Issue issue = new Issue(Utils.getTestIssue());
         Votes votes = issue.getVotes();
         assertNotNull(votes);
 
@@ -87,8 +87,8 @@ public class IssueTest {
     }
 
     @Test
-    public void testGetWatchers(){
-        Issue issue = new Issue(null, Utils.getTestIssue());
+    public void testGetWatchers() throws JiraException{
+        Issue issue = new Issue(Utils.getTestIssue());
         Watches watches = issue.getWatches();
 
         assertNotNull(watches);
@@ -99,8 +99,8 @@ public class IssueTest {
     }
 
     @Test
-    public void testGetVersion(){
-        Issue issue = new Issue(null,Utils.getTestIssue());
+    public void testGetVersion() throws JiraException{
+        Issue issue = new Issue(Utils.getTestIssue());
         List<Version> versions = issue.getFixVersions();
 
         assertNotNull(versions);
@@ -117,23 +117,22 @@ public class IssueTest {
     }
 
     @Test
-    public void testPlainTimeTracking() {
-        Issue issue = new Issue(null,Utils.getTestIssue());
+    public void testPlainTimeTracking() throws JiraException {
+        Issue issue = new Issue(Utils.getTestIssue());
 
         assertEquals(new Integer(144000), issue.getTimeEstimate());
         assertEquals(new Integer(86400), issue.getTimeSpent());
     }
 
     @Test
-    public void testCreatedDate(){
-        Issue issue = new Issue(null,Utils.getTestIssue());
+    public void testCreatedDate() throws JiraException{
+        Issue issue = new Issue(Utils.getTestIssue());
         assertEquals(new DateTime(2013, 9, 29, 20, 16, 19, 854, DateTimeZone.forOffsetHours(1)).toDate(), issue.getCreatedDate());
     }
 
     @Test
-    public void testUpdatedDate(){
-      Issue issue = new Issue(null,Utils.getTestIssue());
+    public void testUpdatedDate() throws JiraException{
+      Issue issue = new Issue(Utils.getTestIssue());
       assertEquals(new DateTime(2013, 10, 9, 22, 24, 55, 961, DateTimeZone.forOffsetHours(1)).toDate(), issue.getUpdatedDate());
     }
-
 }

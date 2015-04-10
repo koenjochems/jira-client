@@ -19,16 +19,14 @@
 
 package net.rcarz.jiraclient.greenhopper;
 
-import net.rcarz.jiraclient.Field;
-
 import java.util.Map;
 
-import net.sf.json.JSONObject;
+import net.rcarz.jiraclient.JiraException;
 
 /**
  * GreenHopper estimate statistics for rapid views.
  */
-public class EstimateStatistic {
+public class EstimateStatistic extends GreenHopperResource {
 
     private String statFieldId = null;
     private Double statFieldValue = 0.0;
@@ -37,22 +35,30 @@ public class EstimateStatistic {
     /**
      * Creates an estimate statistic from a JSON payload.
      *
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected EstimateStatistic(JSONObject json) {
-        Map<?, ?> map = json;
-
-        statFieldId = Field.getString(map.get("statFieldId"));
-
-        if (map.containsKey("statFieldValue") &&
-            map.get("statFieldValue") instanceof JSONObject) {
-
-            Map<?, ?> val = (Map<?, ?>)json.get("statFieldValue");
-
-            statFieldValue = Field.getDouble(val.get("value"));
-            statFieldText = Field.getString(val.get("text"));
+    protected EstimateStatistic(Map<String, Object> data) throws JiraException {
+    	super(data);
+    	
+        if (data != null) {
+        	deserialise(data);
         }
     }
+    
+    /**
+     * @param data Map of the JSON payload
+     */
+    @Override
+	protected void deserialise(Map<String, Object> data) {
+    	statFieldId = GreenHopperField.getString(data.get("statFieldId"));
+		
+   		Map<String, Object> val = GreenHopperField.getMap(data.get("statFieldValue"));
+		if (val != null) {
+			statFieldValue = GreenHopperField.getDouble(val.get("value"));
+			statFieldText = GreenHopperField.getString(val.get("text"));
+		}
+	}
 
     public String getFieldId() {
         return statFieldId;
@@ -66,4 +72,3 @@ public class EstimateStatistic {
         return statFieldText;
     }
 }
-

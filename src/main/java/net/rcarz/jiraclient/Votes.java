@@ -19,9 +19,6 @@
 
 package net.rcarz.jiraclient;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
-
 import java.util.Map;
 
 /**
@@ -29,56 +26,32 @@ import java.util.Map;
  */
 public class Votes extends Resource {
 
+	public static final String URI = "votes";
+	
     private int votes = 0;
     private boolean hasVoted = false;
 
     /**
      * Creates votes from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected Votes(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected Votes(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
-    }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        self = Field.getString(map.get("self"));
-        id = Field.getString(map.get("id"));
-        votes = Field.getInteger(map.get("votes"));
-        hasVoted = Field.getBoolean(map.get("hasVoted"));
+        if (data != null) {
+            deserialise(data);
+        }
     }
 
     /**
-     * Retrieves the given votes record.
-     *
-     * @param restclient REST client instance
-     * @param issue Internal JIRA ID of the issue
-     *
-     * @return a votes instance
-     *
-     * @throws JiraException when the retrieval fails
+     * @param data Map of the JSON payload
      */
-    public static Votes get(RestClient restclient, String issue)
-        throws JiraException {
-
-        JSON result = null;
-
-        try {
-            result = restclient.get(getBaseUri() + "issue/" + issue + "/votes");
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve votes for issue " + issue, ex);
-        }
-
-        if (!(result instanceof JSONObject))
-            throw new JiraException("JSON payload is malformed");
-
-        return new Votes(restclient, (JSONObject)result);
+    @Override
+    protected void deserialise(Map<String, Object> data) {
+        votes = Field.getInteger(data.get("votes"));
+        hasVoted = Field.getBoolean(data.get("hasVoted"));
     }
 
     @Override
@@ -94,4 +67,3 @@ public class Votes extends Resource {
         return hasVoted;
     }
 }
-

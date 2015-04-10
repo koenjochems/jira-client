@@ -19,66 +19,40 @@
 
 package net.rcarz.jiraclient.greenhopper;
 
-import net.rcarz.jiraclient.Field;
-import net.rcarz.jiraclient.JiraException;
-import net.rcarz.jiraclient.Project;
-import net.rcarz.jiraclient.RestClient;
-
 import java.util.Map;
 
-import net.sf.json.JSONObject;
+import net.rcarz.jiraclient.JiraException;
 
 /**
  * Represents a GreenHopper JIRA project.
  */
 public class RapidViewProject extends GreenHopperResource {
 
-    private String key = null;
-    private String name = null;
-
     /**
      * Creates a project from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected RapidViewProject(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected RapidViewProject(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
+        if (data != null) {
+        	deserialise(data);
+        }
     }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        id = Field.getInteger(map.get("id"));
-        key = Field.getString(map.get("key"));
-        name = Field.getString(map.get("name"));
-    }
-
+    
     /**
-     * Retrieves the full JIRA project.
-     *
-     * @return a Project
-     *
-     * @throws JiraException when the retrieval fails
+     * @param data Map of the JSON payload
      */
-    public Project getJiraProject() throws JiraException {
-        return Project.get(restclient, key);
-    }
-
+    @Override
+	protected void deserialise(Map<String, Object> data) {
+		// TODO Auto-generated method stub
+		
+	}
+    
     @Override
     public String toString() {
         return key;
     }
-
-    public String getKey() {
-        return key;
-    }
-
-    public String getName() {
-        return name;
-    }
 }
-

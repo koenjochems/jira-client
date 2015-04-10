@@ -1,13 +1,15 @@
 package net.rcarz.jiraclient;
 
-import net.sf.json.JSONObject;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
-import static junit.framework.Assert.assertEquals;
+import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
+
+import org.junit.Test;
 
 public class StatusTest {
 
@@ -16,29 +18,27 @@ public class StatusTest {
     private String iconURL = "https://site/images/icons/statuses/open.png";
 
     @Test
-    public void testJSONDeserializer() throws IOException, URISyntaxException {
-        Status status = new Status(new RestClient(null, new URI("/123/asd")), getTestJSON());
+    public void testJSONDeserializer() throws IOException, URISyntaxException, JiraException {
+        Status status = new Status(getTestData());
         assertEquals(status.getDescription(), description);
         assertEquals(status.getIconUrl(), iconURL);
         assertEquals(status.getName(), "Open");
         assertEquals(status.getId(), statusID);
     }
 
-    private JSONObject getTestJSON() {
+    private Map<String, Object> getTestData() throws JSONException, JiraException {
         JSONObject json = new JSONObject();
         json.put("description", description);
         json.put("name", "Open");
         json.put("iconUrl", iconURL);
         json.put("id", statusID);
 
-        return json;
+        return RestClient.JSONtoMap(json);
     }
 
     @Test
-    public void testStatusToString() throws URISyntaxException {
-        Status status = new Status(new RestClient(null, new URI("/123/asd")), getTestJSON());
+    public void testStatusToString() throws URISyntaxException, JiraException {
+        Status status = new Status(getTestData());
         assertEquals("Open",status.toString());
     }
-
-
 }

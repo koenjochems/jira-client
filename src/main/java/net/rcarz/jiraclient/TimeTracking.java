@@ -26,7 +26,7 @@ import net.sf.json.JSONObject;
 /**
  * Represents issue time tracking data.
  */
-public class TimeTracking {
+public class TimeTracking extends Resource {
 
     private String originalEstimate = null;
     private String remainingEstimate = null;
@@ -38,23 +38,24 @@ public class TimeTracking {
     /**
      * Creates a time tracking structure from a JSON payload.
      *
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected TimeTracking(JSONObject json) {
-        Map<?, ?> map = json;
+    protected TimeTracking(Map<String, Object> data) throws JiraException {
+    	super(data);
 
-        originalEstimate = Field.getString(map.get("originalEstimate"));
-        remainingEstimate = Field.getString(map.get("remainingEstimate"));
-        timeSpent = Field.getString(map.get("timeSpent"));
-        originalEstimateSeconds = Field.getInteger(map.get("originalEstimateSeconds"));
-        remainingEstimateSeconds = Field.getInteger(map.get("remainingEstimateSeconds"));
-        timeSpentSeconds = Field.getInteger(map.get("timeSpentSeconds"));
+        if (data != null) {
+        	deserialise(data);
+        }
     }
 
-    public TimeTracking() {
+    public TimeTracking() throws JiraException {
+    	super(null);
     }
 
-    public TimeTracking(TimeTracking tt) {
+    public TimeTracking(TimeTracking tt) throws JiraException {
+    	super(null);
+    	
         this.originalEstimate = tt.originalEstimate;
         this.remainingEstimate = tt.remainingEstimate;
         this.originalEstimateSeconds = tt.originalEstimateSeconds;
@@ -62,6 +63,19 @@ public class TimeTracking {
         this.timeSpent = tt.timeSpent;
         this.timeSpentSeconds =tt.timeSpentSeconds;
     }
+    
+    /**
+     * @param data Map of the JSON payload
+     */
+    @Override
+	protected void deserialise(Map<String, Object> data) {
+    	originalEstimate = Field.getString(data.get("originalEstimate"));
+        remainingEstimate = Field.getString(data.get("remainingEstimate"));
+        timeSpent = Field.getString(data.get("timeSpent"));
+        originalEstimateSeconds = Field.getInteger(data.get("originalEstimateSeconds"));
+        remainingEstimateSeconds = Field.getInteger(data.get("remainingEstimateSeconds"));
+        timeSpentSeconds = Field.getInteger(data.get("timeSpentSeconds"));
+	}
 
     protected JSONObject toJsonObject() {
         JSONObject object = new JSONObject();

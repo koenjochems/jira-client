@@ -20,7 +20,7 @@
 				<attribute name="Built-At" value="${build-info.current-time}" />
             </manifest>
             
-            <fileset dir="bin/main"/>
+            <fileset dir="bin"/>
         </jar>
 
     </target>

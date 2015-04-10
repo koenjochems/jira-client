@@ -19,16 +19,14 @@
 
 package net.rcarz.jiraclient.greenhopper;
 
-import net.rcarz.jiraclient.Field;
-
 import java.util.Map;
 
-import net.sf.json.JSONObject;
+import net.rcarz.jiraclient.JiraException;
 
 /**
  * GreenHopper estimate sum for rapid views.
  */
-public class EstimateSum {
+public class EstimateSum extends GreenHopperResource {
 
     private Double value = null;
     private String text = null;
@@ -36,14 +34,25 @@ public class EstimateSum {
     /**
      * Creates an estimate sum from a JSON payload.
      *
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected EstimateSum(JSONObject json) {
-        Map<?, ?> map = json;
-
-        value = Field.getDouble(map.get("value"));
-        text = Field.getString(map.get("text"));
+    protected EstimateSum(Map<String, Object> data) throws JiraException {
+    	super(data);
+    	
+        if (data != null) {
+        	deserialise(data);
+        }
     }
+    
+    /**
+     * @param data Map of the JSON payload
+     */
+    @Override
+	protected void deserialise(Map<String, Object> data) {
+    	value = GreenHopperField.getDouble(data.get("value"));
+   		text = GreenHopperField.getString(data.get("text"));
+	}
 
     public Double getValue() {
         return value;
@@ -53,4 +62,3 @@ public class EstimateSum {
         return text;
     }
 }
-

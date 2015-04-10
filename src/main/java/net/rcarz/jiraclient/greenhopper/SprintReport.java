@@ -19,22 +19,18 @@
 
 package net.rcarz.jiraclient.greenhopper;
 
-import java.net.URI;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import net.rcarz.jiraclient.JiraException;
-import net.rcarz.jiraclient.RestClient;
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
 
 /**
  * GreenHopper sprint statistics.
  */
-public class SprintReport {
+public class SprintReport extends GreenHopperResource {
 
-    private RestClient restclient = null;
+	public static final String URI = RESOURCE_URI + "rapid/charts/sprintreport";
+	
     private Sprint sprint = null;
     private List<SprintIssue> completedIssues = null;
     private List<SprintIssue> incompletedIssues = null;
@@ -48,89 +44,32 @@ public class SprintReport {
     /**
      * Creates a sprint report from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected SprintReport(RestClient restclient, JSONObject json) {
-        this.restclient = restclient;
+    protected SprintReport(Map<String, Object> data) throws JiraException {
+    	super(data);
 
-        if (json != null)
-            deserialise(json);
-    }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        sprint = GreenHopperField.getResource(Sprint.class, map.get("sprint"), restclient);
-        completedIssues = GreenHopperField.getResourceArray(
-            SprintIssue.class,
-            map.get("completedIssues"),
-            restclient);
-        incompletedIssues = GreenHopperField.getResourceArray(
-            SprintIssue.class,
-            map.get("incompletedIssues"),
-            restclient);
-        puntedIssues = GreenHopperField.getResourceArray(
-            SprintIssue.class,
-            map.get("puntedIssues"),
-            restclient);
-        completedIssuesEstimateSum = GreenHopperField.getEstimateSum(
-            map.get("completedIssuesEstimateSum"));
-        incompletedIssuesEstimateSum = GreenHopperField.getEstimateSum(
-            map.get("incompletedIssuesEstimateSum"));
-        allIssuesEstimateSum = GreenHopperField.getEstimateSum(
-            map.get("allIssuesEstimateSum"));
-        puntedIssuesEstimateSum = GreenHopperField.getEstimateSum(
-            map.get("puntedIssuesEstimateSum"));
-        issueKeysAddedDuringSprint = GreenHopperField.getStringArray(
-            map.get("issueKeysAddedDuringSprint"));
-    }
-
-    /**
-     * Retrieves the sprint report for the given rapid view and sprint.
-     *
-     * @param restclient REST client instance
-     * @param rv Rapid View instance
-     * @param sprint Sprint instance
-     *
-     * @return the sprint report
-     *
-     * @throws JiraException when the retrieval fails
-     */
-    public static SprintReport get(RestClient restclient, RapidView rv, Sprint sprint)
-        throws JiraException {
-
-        final int rvId = rv.getId();
-        final int sprintId = sprint.getId();
-        JSON result = null;
-
-        try {
-            URI reporturi = restclient.buildURI(
-                GreenHopperResource.RESOURCE_URI + "rapid/charts/sprintreport",
-                new HashMap<String, String>() {/**
-					 * 
-					 */
-					private static final long serialVersionUID = 1L;
-
-				{
-                    put("rapidViewId", Integer.toString(rvId));
-                    put("sprintId", Integer.toString(sprintId));
-                }});
-            result = restclient.get(reporturi);
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve sprint report", ex);
+        if (data != null) {
+        	deserialise(data);
         }
-
-        if (!(result instanceof JSONObject))
-            throw new JiraException("JSON payload is malformed");
-
-        JSONObject jo = (JSONObject)result;
-
-        if (!jo.containsKey("contents") || !(jo.get("contents") instanceof JSONObject))
-            throw new JiraException("Sprint report content is malformed");
-
-        return new SprintReport(restclient, (JSONObject)jo.get("contents"));
     }
+    
+    /**
+     * @param data Map of the JSON payload
+     */
+    @Override
+	protected void deserialise(Map<String, Object> data) throws JiraException {
+    	sprint = GreenHopperField.getResource(Sprint.class, data.get("sprint"));
+        completedIssues = GreenHopperField.getResourceArray(SprintIssue.class, data.get("completedIssues"));
+        incompletedIssues = GreenHopperField.getResourceArray(SprintIssue.class, data.get("incompletedIssues"));
+        puntedIssues = GreenHopperField.getResourceArray(SprintIssue.class, data.get("puntedIssues"));
+        completedIssuesEstimateSum = GreenHopperField.getResource(EstimateSum.class, data.get("completedIssuesEstimateSum"));
+        incompletedIssuesEstimateSum = GreenHopperField.getResource(EstimateSum.class, data.get("incompletedIssuesEstimateSum"));
+        allIssuesEstimateSum = GreenHopperField.getResource(EstimateSum.class, data.get("allIssuesEstimateSum"));
+        puntedIssuesEstimateSum = GreenHopperField.getResource(EstimateSum.class, data.get("puntedIssuesEstimateSum"));      
+        issueKeysAddedDuringSprint = GreenHopperField.getStringArray(data.get("issueKeysAddedDuringSprint"));
+	}
 
     public Sprint getSprint() {
         return sprint;
@@ -168,5 +107,3 @@ public class SprintReport {
         return issueKeysAddedDuringSprint;
     }
 }
-
-

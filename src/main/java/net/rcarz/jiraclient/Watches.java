@@ -19,9 +19,6 @@
 
 package net.rcarz.jiraclient;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
-
 import java.util.Map;
 
 /**
@@ -29,56 +26,32 @@ import java.util.Map;
  */
 public class Watches extends Resource {
 
+	public static final String URI = "watches";
+	
     private int watchCount = 0;
     private boolean isWatching = false;
 
     /**
      * Creates watches from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected Watches(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected Watches(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
-    }
-
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        self = Field.getString(map.get("self"));
-        id = Field.getString(map.get("id"));
-        watchCount = Field.getInteger(map.get("watchCount"));
-        isWatching = Field.getBoolean(map.get("isWatching"));
+        if (data != null) {
+            deserialise(data);
+        }
     }
 
     /**
-     * Retrieves the given watches record.
-     *
-     * @param restclient REST client instance
-     * @param issue Internal JIRA ID of the issue
-     *
-     * @return a watches instance
-     *
-     * @throws JiraException when the retrieval fails
+     * @param data Map of the JSON payload
      */
-    public static Watches get(RestClient restclient, String issue)
-        throws JiraException {
-
-        JSON result = null;
-
-        try {
-            result = restclient.get(getBaseUri() + "issue/" + issue + "/watches");
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve watches for issue " + issue, ex);
-        }
-
-        if (!(result instanceof JSONObject))
-            throw new JiraException("JSON payload is malformed");
-
-        return new Watches(restclient, (JSONObject)result);
+    @Override
+    protected void deserialise(Map<String, Object> data) {
+        watchCount = Field.getInteger(data.get("watchCount"));
+        isWatching = Field.getBoolean(data.get("isWatching"));
     }
 
     @Override
@@ -94,4 +67,3 @@ public class Watches extends Resource {
         return isWatching;
     }
 }
-

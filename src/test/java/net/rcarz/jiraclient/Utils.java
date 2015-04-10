@@ -1,11 +1,14 @@
 package net.rcarz.jiraclient;
 
+import java.util.Map;
+
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
 public class Utils {
 
-    public static JSONObject getTestIssue() {
+    public static Map<String, Object> getTestIssue() throws JSONException, JiraException {
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON("{\n" +
         "  \"expand\": \"renderedFields,names,schema,transitions,operations,editmeta,changelog\",\n" +
         "  \"id\": \"10742\",\n" +
@@ -199,7 +202,7 @@ public class Utils {
         "  }\n" +
         "}");
 
-        return jsonObject;
+        return RestClient.JSONtoMap(jsonObject);
     }
 
 }

@@ -19,8 +19,6 @@
 
 package net.rcarz.jiraclient;
 
-import net.sf.json.JSONObject;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -50,29 +48,26 @@ public class ChangeLogEntry extends Resource {
     /**
      * Creates a change log from a JSON payload.
      *
-     * @param restclient REST client instance
-     * @param json JSON payload
+     * @param data Map of the JSON payload
+     * @throws JiraException 
      */
-    protected ChangeLogEntry(RestClient restclient, JSONObject json) {
-        super(restclient);
+    protected ChangeLogEntry(Map<String, Object> data) throws JiraException {
+        super(data);
 
-        if (json != null)
-            deserialise(json);
+        if (data != null) {
+        	deserialise(data);
+        }
     }
-
+    
     /**
-     * Deserializes a change log entry from a json payload.
-     * @param json the json payload
+     * @param data Map of the JSON payload
      */
-    private void deserialise(JSONObject json) {
-        Map<?, ?> map = json;
-
-        id = Field.getString(map.get("id"));
-        author = Field.getResource(User.class, map.get("author"), restclient);
-        created = Field.getDateTime(map.get("created"));
-        items = Field.getResourceArray(ChangeLogItem.class, map.get(
-                Field.CHANGE_LOG_ITEMS), restclient);
-    }
+    @Override
+	protected void deserialise(Map<String, Object> data) throws JiraException {
+    	author = Field.getResource(User.class, data.get("author"));      
+        created = Field.getDateTime(data.get("created"));
+        items = Field.getResourceArray(ChangeLogItem.class, data.get(Field.CHANGE_LOG_ITEMS));
+	}
 
     /**
      * Obtains the author of the change log entry.

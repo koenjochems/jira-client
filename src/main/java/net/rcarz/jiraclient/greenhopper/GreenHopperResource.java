@@ -19,32 +19,23 @@
 
 package net.rcarz.jiraclient.greenhopper;
 
-import net.rcarz.jiraclient.RestClient;
+import java.util.Map;
+
+import net.rcarz.jiraclient.AResource;
+import net.rcarz.jiraclient.JiraException;
 
 /**
  * A base class for GreenHopper resources.
  */
-public abstract class GreenHopperResource {
+public abstract class GreenHopperResource extends AResource {
 
-    protected static final String RESOURCE_URI = "/rest/greenhopper/1.0/";
-
-    protected RestClient restclient = null;
-    protected int id = 0;
-
-    /**
-     * Creates a new GreenHopper resource.
-     *
-     * @param restclient REST client instance
-     */
-    public GreenHopperResource(RestClient restclient) {
-        this.restclient = restclient;
-    }
-
-    /**
-     * Internal JIRA ID.
-     */
-    public int getId() {
-        return id;
-    }
+	public static final String RESOURCE_URI = "/rest/greenhopper/1.0/";
+	
+	/**
+	 * @param data Map of the JSON payload
+	 * @throws JiraException
+	 */
+    protected GreenHopperResource(Map<String, Object> data) throws JiraException {
+		super(data);
+	}   
 }
-
