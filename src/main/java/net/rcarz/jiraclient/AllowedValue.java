@@ -22,36 +22,36 @@ package net.rcarz.jiraclient;
 import java.util.Map;
 
 /**
- * A base class for JIRA resources.
+ * Represents an issue attachment.
  */
-public abstract class Resource extends AResource {
-    
-    protected String self = null;
+public class AllowedValue extends Resource {
 
-    protected Resource(String self, String id, String name, String key) {
-    	super(id, name, key);
-    	
-    	this.self = self;
-    }
-    
+	private String description;
+	
     /**
-     * Creates a new JIRA resource.
+     * Creates an AllowedValue from a JSON payload.
      *
      * @param data Map of the JSON payload
+     * 
      * @throws JiraException 
      */
-    public Resource(Map<String, Object> data) {
-    	super(data);
- 
-    	if (data != null) {
-    		self = Field.getString(data.get("self"));
-    	}
+    protected AllowedValue(Map<String, Object> data) throws JiraException {
+        super(data);
+
+        if (data != null) {
+        	deserialise(data);
+        }
     }
-    
+
     /**
-     * Resource URL.
+     * @param data Map of the JSON payload
      */
-    public String getSelf() {
-        return self;
+    @Override
+	protected void deserialise(Map<String, Object> data) throws JiraException {
+    	description = Field.getString(data.get("description"));
+	}
+
+    public String getDescription() {
+        return description;
     }
 }

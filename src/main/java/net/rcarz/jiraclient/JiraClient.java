@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.rcarz.jiraclient.Field.Meta;
 import net.rcarz.jiraclient.Issue.NewAttachment;
 import net.sf.json.JSONObject;
 
@@ -87,9 +88,9 @@ public class JiraClient extends AClient {
      * Used to chain fields to a create action.
      */
     public final class FluentCreateIssue extends AbstractFluent {
-        Map<String, Object> createmeta = null;
+        Map<String, Meta> createmeta = null;
 
-        private FluentCreateIssue(RestClient restclient, Map<String, Object> map) {
+        private FluentCreateIssue(RestClient restclient, Map<String, Meta> map) {
         	super(restclient);
         	
             this.createmeta = map;
@@ -146,7 +147,7 @@ public class JiraClient extends AClient {
             }
 
             for (Map.Entry<String, Object> ent : fields.entrySet()) {
-                Object newval = Field.toJson(ent.getKey(), ent.getValue(), createmeta);
+                Object newval = Field.toJson(ent.getKey(), ent.getValue(), createmeta.get(ent.getKey()));
                 fieldmap.put(ent.getKey(), newval);
             }
 
@@ -174,10 +175,10 @@ public class JiraClient extends AClient {
      */
     public final class FluentUpdateIssue extends AbstractFluent {
         Map<String, List<Object>> fieldOpers = new HashMap<String, List<Object>>();
-        Map<String, Object> editmeta = null;
+        Map<String, Meta> editmeta = null;
         String key = null;
 
-        private FluentUpdateIssue(RestClient restclient, Map<String, Object> editmeta, String issueKey) {
+        private FluentUpdateIssue(RestClient restclient, Map<String, Meta> editmeta, String issueKey) {
         	super(restclient);
         	
             this.editmeta = editmeta;
@@ -197,12 +198,12 @@ public class JiraClient extends AClient {
                 throw new JiraException("No fields were given for update");
 
             for (Map.Entry<String, Object> ent : fields.entrySet()) {
-                Object newval = Field.toJson(ent.getKey(), ent.getValue(), editmeta);
+                Object newval = Field.toJson(ent.getKey(), ent.getValue(), editmeta.get(ent.getKey()));
                 fieldmap.put(ent.getKey(), newval);
             }
 
             for (Map.Entry<String, List<Object>> ent : fieldOpers.entrySet()) {
-                Object newval = Field.toJson(ent.getKey(), ent.getValue(), editmeta);
+                Object newval = Field.toJson(ent.getKey(), ent.getValue(), editmeta.get(ent.getKey()));
                 updatemap.put(ent.getKey(), newval);
             }
 
@@ -484,6 +485,14 @@ public class JiraClient extends AClient {
         return String.format("rest/auth/%s", apirev);
     }
     
+    public <T extends Resource> T getResource(Class<T> type, String... pathParts) throws JiraException {
+    	try {
+        	return Field.getResource(type, restclient.get(pathParts));
+        } catch (Exception ex) {
+            throw new JiraException("Failed to retrieve " + type.toString() + " with uri '" + pathParts + "'.", ex);
+        }
+    }
+    
     /**
      * Retrieves the given attachment record.
      *
@@ -494,48 +503,7 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public Attachment getAttachement(String attachmentId) throws JiraException {
-    	try {
-        	return new Attachment(restclient.get(getBaseUri(), Attachment.URI, attachmentId));
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve attachment " + attachmentId, ex);
-        }
-    }
-    
-    /**
-     * 
-     * @param issue
-     * @return
-     * @throws JiraException
-     */
-    public ArrayList<IssueHistory> getIssueChangeLog(Issue issue) throws JiraException {
-        try {
-            ArrayList<IssueHistory> changes = null;
-            Map<String, Object> response = getNextPortion(issue, 0);
-
-            while (true) {
-            	Map<String, Object> opers = Field.getMap(response.get("changelog"));
-                Integer totalObj = Field.getInteger(opers.get("total"));
-                List<Object> histories = Field.getList(opers.get("histories"));
-
-                if (changes == null) {
-                    changes = new ArrayList<IssueHistory>(totalObj);
-                }
-
-                for (Object object : histories) {
-                    changes.add(new IssueHistory(Field.getMap(object)));
-                }
-
-                if (changes.size() >= totalObj) {
-                    break;
-                } else {
-                    response = getNextPortion(issue, changes.size());
-                }
-            } 
-           
-            return changes;
-        } catch (Exception ex) {
-            throw new JiraException(ex.getMessage(), ex);
-        }
+       	return getResource(Attachment.class, getBaseUri(), Attachment.URI, attachmentId);
     }
 
     /**
@@ -549,11 +517,7 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public Comment getComment(String issueKey, String commentId) throws JiraException {
-        try {
-        	return new Comment(restclient.get(getBaseUri(), Issue.URI, issueKey, Comment.URI, commentId));
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve comment " + commentId + " on issue " + issueKey, ex);
-        }
+       	return getResource(Comment.class, getBaseUri(), Issue.URI, issueKey, Comment.URI, commentId);
     }
 
     /**
@@ -566,11 +530,7 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public Component getComponent(String componentId) throws JiraException {
-        try {
-        	return new Component(restclient.get(getBaseUri(), Component.URI, componentId));
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve component " + componentId, ex);
-        }
+       	return getResource(Component.class, getBaseUri(), Component.URI, componentId);
     }
     
     /**
@@ -583,11 +543,7 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public CustomFieldOption getCustomFieldOption(String optionId) throws JiraException {
-        try {
-        	return new CustomFieldOption(restclient.get(getBaseUri(), CustomFieldOption.URI, optionId));
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve custom field option " + optionId, ex);
-        }
+       	return getResource(CustomFieldOption.class, getBaseUri(), CustomFieldOption.URI, optionId);
     }
     
     /**
@@ -600,11 +556,7 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public IssueLink getIssueLink(String linkId) throws JiraException {
-        try {
-        	return new IssueLink(restclient.get(getBaseUri(), IssueLink.URI, linkId));
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve issue link " + linkId, ex);
-        }
+       	return getResource(IssueLink.class, getBaseUri(), IssueLink.URI, linkId);
     }
     
     /**
@@ -617,11 +569,7 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public IssueType getIssueType(String typeId) throws JiraException {
-        try {
-        	return new IssueType(restclient.get(getBaseUri(), IssueType.URI, typeId));
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve issue type " + typeId, ex);
-        }
+       	return getResource(IssueType.class, getBaseUri(), IssueType.URI, typeId);
     }
     
     /**
@@ -647,11 +595,7 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public LinkType getLinkType(String typeId) throws JiraException {
-        try {
-        	return new LinkType(restclient.get(getBaseUri(), LinkType.URI, typeId));
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve issue link type " + typeId, ex);
-        }
+       	return getResource(LinkType.class, getBaseUri(), LinkType.URI, typeId);
     }
     
     /**
@@ -664,11 +608,7 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public Priority getPriority(String priorityId) throws JiraException {
-        try {
-        	return new Priority(restclient.get(getBaseUri(), Priority.URI, priorityId));
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve priority " + priorityId, ex);
-        }
+       	return getResource(Priority.class, getBaseUri(), Priority.URI, priorityId);
     }
     
     /**
@@ -694,11 +634,7 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public Project getProject(String projectKey) throws JiraException {
-        try {
-            return new Project(restclient.get(getBaseUri(), Project.URI, projectKey));
-        } catch (Exception ex) {
-            throw new JiraException(ex.getMessage(), ex);
-        }
+        return getResource(Project.class, getBaseUri(), Project.URI, projectKey);
     }
     
     /**
@@ -711,8 +647,7 @@ public class JiraClient extends AClient {
      */
     public List<Project> getProjects() throws JiraException {
         try {
-        	return Field.getResourceArray(Project.class, 
-        			Field.getList(restclient.get(getBaseUri(), Project.URI)));
+        	return Field.getResourceArray(Project.class, Field.getList(restclient.get(getBaseUri(), Project.URI)));
         } catch (Exception ex) {
             throw new JiraException(ex.getMessage(), ex);
         }
@@ -737,11 +672,7 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public Resolution getResolution(String resolutionId) throws JiraException {
-        try {
-        	return new Resolution(restclient.get(getBaseUri(), Resolution.URI, resolutionId));
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve resolution " + resolutionId, ex);
-        }
+       	return getResource(Resolution.class, getBaseUri(), Resolution.URI, resolutionId);
     }
     
     /**
@@ -754,11 +685,7 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public Status getStatus(String statusId) throws JiraException {
-        try {
-        	return new Status(restclient.get(getBaseUri(), Status.URI, statusId));
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve status " + statusId, ex);
-        }
+       	return getResource(Status.class, getBaseUri(), Status.URI, statusId);
     }
     
     /**
@@ -786,11 +713,7 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public Version getVersion(String versionId) throws JiraException {
-        try {
-        	return new Version(restclient.get(getBaseUri(), Version.URI, versionId));
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve version " + versionId, ex);
-        }
+       	return getResource(Version.class, getBaseUri(), Version.URI, versionId);
     }
 
     /**
@@ -803,11 +726,7 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public Watches getWatches(String issueKey) throws JiraException {
-        try {
-        	return new Watches(restclient.get(getBaseUri(), Issue.URI, issueKey, Watches.URI));
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve watches for issue " + issueKey, ex);
-        }
+       	return getResource(Watches.class, getBaseUri(), Issue.URI, issueKey, Watches.URI);
     }
     
     /**
@@ -821,14 +740,10 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public WorkLog getWorkLog(String issueKey, String worklogId) throws JiraException {
-        try {
-        	return new WorkLog(restclient.get(getBaseUri(), Issue.URI, issueKey, WorkLog.URI, worklogId));
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve work log " + worklogId + " on issue " + issueKey, ex);
-        }
+       	return getResource(WorkLog.class, getBaseUri(), Issue.URI, issueKey, WorkLog.URI, worklogId);
     }
     
-    public List<WorkLog> getAllWorkLogs(String issueKey) throws JiraException {
+    public List<WorkLog> getWorkLogs(String issueKey) throws JiraException {
         try {
         	return Field.getResourceArray(WorkLog.class,  
         		Field.getList(restclient.get(getBaseUri(), Issue.URI, issueKey, WorkLog.URI)));
@@ -847,11 +762,7 @@ public class JiraClient extends AClient {
      * @throws JiraException when the retrieval fails
      */
     public Votes getVotes(String issueKey) throws JiraException {
-        try {
-        	return new Votes(restclient.get(getBaseUri(), Issue.URI, issueKey, Votes.URI));
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve votes for issue " + issueKey, ex);
-        }
+       	return getResource(Votes.class, getBaseUri(), Issue.URI, issueKey, Votes.URI);
     }
     
     /**
@@ -976,9 +887,17 @@ public class JiraClient extends AClient {
 
         return Field.getInteger(data.get("total"));
     }
-        
-    public Map<String, Object> getCreateMetadata(String projectKey, String issueType) throws JiraException {
+    
+    /**
+     * 
+     * @param projectKey
+     * @param issueType
+     * @return
+     * @throws JiraException
+     */
+    public Map<String, Meta> getCreateMetadata(String projectKey, String issueType) throws JiraException {
     	Map<String, Object> data = null;
+    	Map<String, Meta> metadata = new HashMap<String, Meta>();
 
         try {
         	Map<String, String> queryParams = new HashMap<String, String>();
@@ -999,11 +918,24 @@ public class JiraClient extends AClient {
             throw new JiraException("Project '" + projectKey + "'  or issue type '" + issueType + 
                     "' missing from create metadata. Do you have enough permissions?");
 
-        return projects.get(0).getIssueTypes().get(0).getFields();
+        Map<String, Object> fields = projects.get(0).getIssueTypes().get(0).getFields();
+        
+        for (String key : fields.keySet()) {
+        	metadata.put(key, Field.getFieldMetadata(key, fields));
+		}
+        
+        return metadata;
     }
 
-    public Map<String, Object> getEditMetadata(String issueKey) throws JiraException {
+    /**
+     * 
+     * @param issueKey
+     * @return
+     * @throws JiraException
+     */
+    public Map<String, Meta> getEditMetadata(String issueKey) throws JiraException {
     	Map<String, Object> data = null;
+    	Map<String, Meta> metadata = new HashMap<String, Meta>();
 
         try {
         	data = restclient.get(getBaseUri(), Issue.URI, issueKey, EDITMETA_URI);
@@ -1014,7 +946,13 @@ public class JiraClient extends AClient {
         if (!(data.get("fields") instanceof Map))
             throw new JiraException("Edit metadata is malformed");
 
-        return Field.getMap(data.get("fields"));
+        Map<String, Object> fields = Field.getMap(data.get("fields"));
+        
+        for (String key : fields.keySet()) {
+        	metadata.put(key, Field.getFieldMetadata(key, fields));
+		}
+        
+        return metadata;
     }
 
     public List<Transition> getTransitions(String issueKey) throws JiraException {
@@ -1099,7 +1037,7 @@ public class JiraClient extends AClient {
             JSONObject vis = new JSONObject();
             vis.put("type", visType);
             vis.put("value", visName);
-
+            
             req.put("visibility", vis);
         }
 
@@ -1300,6 +1238,43 @@ public class JiraClient extends AClient {
             throw new JiraException("Failed to retrieve issue " + issueKey, ex);
         }
     }
+    
+    /**
+     * 
+     * @param issue
+     * @return
+     * @throws JiraException
+     */
+    public ArrayList<IssueHistory> getIssueChangeLog(Issue issue) throws JiraException {
+        try {
+            ArrayList<IssueHistory> changes = null;
+            Map<String, Object> response = getNextPortion(issue, 0);
+
+            while (true) {
+            	Map<String, Object> opers = Field.getMap(response.get("changelog"));
+                Integer totalObj = Field.getInteger(opers.get("total"));
+                List<Object> histories = Field.getList(opers.get("histories"));
+
+                if (changes == null) {
+                    changes = new ArrayList<IssueHistory>(totalObj);
+                }
+
+                for (Object object : histories) {
+                    changes.add(new IssueHistory(Field.getMap(object)));
+                }
+
+                if (changes.size() >= totalObj) {
+                    break;
+                } else {
+                    response = getNextPortion(issue, changes.size());
+                }
+            } 
+           
+            return changes;
+        } catch (Exception ex) {
+            throw new JiraException(ex.getMessage(), ex);
+        }
+    }
 
     /**
      * Search for issues with the given query and specify which fields to
@@ -1423,20 +1398,16 @@ public class JiraClient extends AClient {
      * @param project Key of the project context
      * @param issueType Name of the issue type
      *
-     * @return a search result structure with results
+     * @return List with AllowedValue objects
      *
      * @throws JiraException when the search fails
      */
-    public List<CustomFieldOption> getCustomFieldAllowedValues(String field, String project, String issueType) throws JiraException {
-        Map<String, Object> createMetadata = getCreateMetadata(project, issueType);
-        if (!(createMetadata.get(field) instanceof Map)) {
+    public List<AllowedValue> getAllowedValues(String field, String project, String issueType) throws JiraException {
+        Map<String, Meta> createMetadata = getCreateMetadata(project, issueType);
+        if (!(createMetadata.get(field) instanceof Meta)) {
         	throw new JiraException("Field not found.");
         }
-        Map<String, Object> fieldMetadata = Field.getMap(createMetadata.get(field));
-        if (fieldMetadata == null) {
-        	throw new JiraException("Field meta data not found.");
-        }
-        return Field.getResourceArray(CustomFieldOption.class, fieldMetadata.get("allowedValues"));
+        return createMetadata.get(field).allowedValues;
     }
 
     /**
@@ -1445,20 +1416,12 @@ public class JiraClient extends AClient {
      * @param project Key of the project context
      * @param issueType Name of the issue type
      *
-     * @return a search result structure with results
+     * @return List with AllowedValue objects for the component field
      *
      * @throws JiraException when the search fails
      */
-    public List<Component> getComponentsAllowedValues(String project, String issueType) throws JiraException {
-    	Map<String, Object> createMetadata = getCreateMetadata(project, issueType);
-    	if (!(createMetadata.get(Field.COMPONENTS) instanceof Map)) {
-    		throw new JiraException("Field not found.");
-    	}
-    	Map<String, Object> fieldMetadata = Field.getMap(createMetadata.get(Field.COMPONENTS));
-    	if (fieldMetadata == null) {
-    		throw new JiraException("Field meta data not found.");
-    	}
-        return Field.getResourceArray(Component.class, fieldMetadata.get("allowedValues"));
+    public List<AllowedValue> getComponentsAllowedValues(String project, String issueType) throws JiraException {
+    	return getAllowedValues(Field.COMPONENTS, project, issueType);
     }
 
     public String getSelf() {
@@ -1473,8 +1436,7 @@ public class JiraClient extends AClient {
      * @return a fluent create instance
      */
     public FluentCreateComponent createComponent(String project) {
-    	FluentCreateComponent fc = new FluentCreateComponent(restclient, project);
-        return fc;
+    	return new FluentCreateComponent(restclient, project);
     }
     
     public ArrayList<IssueHistory> filterChangeLog(List<IssueHistory> histoy, String fields) throws JiraException {

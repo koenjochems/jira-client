@@ -49,6 +49,35 @@ public final class Field extends AField {
         public String system;
         public String custom;
         public int customId;
+        public List<AllowedValue> allowedValues;
+        
+        public Meta(String key, Map<String, Object> data) throws JiraException {
+        	this.key = key;
+        	
+        	if (data != null) {
+            	deserialise(data);
+            }
+        }
+
+        /**
+         * @param data Map of the JSON payload
+         */
+    	protected void deserialise(Map<String, Object> data) throws JiraException {
+            Map<String, Object> schema = getMap(data.get("schema"));       
+            if (schema == null) {
+            	throw new JiraException("Field '" + key + "' is missing schema metadata");
+            }
+            
+            this.required = Field.getBoolean(data.get("required"));
+            this.name = Field.getString(data.get("name"));
+            this.allowedValues = Field.getResourceArray(AllowedValue.class, data.get("allowedValues"));
+            
+            this.type = Field.getString(schema.get("type"));
+            this.items = Field.getString(schema.get("items"));
+            this.system = Field.getString(schema.get("system"));
+            this.custom = Field.getString(schema.get("custom"));
+            this.customId = Field.getInteger(schema.get("customId"));
+        }
         
         @Override
         public String toString() {
@@ -224,7 +253,9 @@ public final class Field extends AField {
         T result = null;
 
         if (data instanceof Map) {
-            if (type == Attachment.class)
+        	if (type == AllowedValue.class)
+                result = (T)new AllowedValue((Map<String, Object>) data);
+        	else if (type == Attachment.class)
                 result = (T)new Attachment((Map<String, Object>) data);
             else if (type == ChangeLog.class)
                 result = (T)new ChangeLog((Map<String, Object>) data);
@@ -334,26 +365,8 @@ public final class Field extends AField {
         if (f == null) {
         	throw new JiraException("Field '" + name + "' does not exist or read-only");
         }
-        
-        Map<String, Object> schema = getMap(f.get("schema"));       
-        if (schema == null) {
-        	throw new JiraException("Field '" + name + "' is missing schema metadata");
-        }
-        
-        Meta m = new Meta();
-
-        m.key = name;
-        
-        m.required = Field.getBoolean(f.get("required"));
-        m.name = Field.getString(f.get("name"));
-        
-        m.type = Field.getString(schema.get("type"));
-        m.items = Field.getString(schema.get("items"));
-        m.system = Field.getString(schema.get("system"));
-        m.custom = Field.getString(schema.get("custom"));
-        m.customId = Field.getInteger(schema.get("customId"));
-
-        return m;
+                
+        return new Meta(name, f);
     }
 
     /**
@@ -434,21 +447,20 @@ public final class Field extends AField {
      * @throws JiraException when a value is bad or field has invalid metadata
      * @throws UnsupportedOperationException when a field type isn't supported
      */
-    public static Object toJson(String name, Object value, Map<String, Object> createmeta)
+    public static Object toJson(String name, Object value, Meta createmeta)
         throws JiraException, UnsupportedOperationException {
 
-        Meta m = getFieldMetadata(name, createmeta);
-        if (m.type == null)
+        if (createmeta.type == null)
             throw new JiraException("Field metadata is missing a type");
 
-        if (m.type.equals("array")) {
+        if (createmeta.type.equals("array")) {
             if (value == null)
                 value = new ArrayList<Object>();
             else if (!(value instanceof Iterable))
                 throw new JiraException("Field expects an Iterable value");
 
-            return toArray((Iterable<?>)value, m.items);
-        } else if (m.type.equals("date")) {
+            return toArray((Iterable<?>)value, createmeta.items);
+        } else if (createmeta.type.equals("date")) {
             if (value == null)
                 return JSONNull.getInstance();
 
@@ -458,7 +470,7 @@ public final class Field extends AField {
 
             SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
             return df.format(d);
-        } else if (m.type.equals("datetime")) {
+        } else if (createmeta.type.equals("datetime")) {
             if (value == null)
                 return JSONNull.getInstance();
             else if (!(value instanceof Timestamp))
@@ -466,8 +478,8 @@ public final class Field extends AField {
 
             SimpleDateFormat df = new SimpleDateFormat(DATETIME_FORMAT);
             return df.format(value);
-        } else if (m.type.equals("issuetype") || m.type.equals("priority") ||
-                m.type.equals("user") || m.type.equals("resolution")) {
+        } else if (createmeta.type.equals("issuetype") || createmeta.type.equals("priority") ||
+        		createmeta.type.equals("user") || createmeta.type.equals("resolution")) {
             JSONObject json = new JSONObject();
 
             if (value == null)
@@ -479,7 +491,7 @@ public final class Field extends AField {
                 json.put(ValueType.NAME.toString(), value.toString());
 
             return json.toString();
-        } else if (m.type.equals("project") || m.type.equals("issuelink")) {
+        } else if (createmeta.type.equals("project") || createmeta.type.equals("issuelink")) {
             JSONObject json = new JSONObject();
 
             if (value == null)
@@ -491,7 +503,7 @@ public final class Field extends AField {
                 json.put(ValueType.KEY.toString(), value.toString());
 
             return json.toString();
-        } else if (m.type.equals("string") || (m.type.equals("securitylevel"))) {
+        } else if (createmeta.type.equals("string") || (createmeta.type.equals("securitylevel"))) {
             if (value == null)
                 return "";
             else if (value instanceof List)
@@ -504,12 +516,12 @@ public final class Field extends AField {
             }
 
             return value.toString();
-        } else if (m.type.equals("timetracking")) {
+        } else if (createmeta.type.equals("timetracking")) {
             if (value == null)
                 return JSONNull.getInstance();
             else if (value instanceof TimeTracking)
                 return ((TimeTracking) value).toJsonObject();
-        } else if (m.type.equals("number")) {
+        } else if (createmeta.type.equals("number")) {
             if(!(value instanceof java.lang.Integer) && !(value instanceof java.lang.Double) && !(value 
                     instanceof java.lang.Float) && !(value instanceof java.lang.Long) )
             {
@@ -518,7 +530,7 @@ public final class Field extends AField {
             return value;
         }
 
-        throw new UnsupportedOperationException(m.type + " is not a supported field type");
+        throw new UnsupportedOperationException(createmeta.type + " is not a supported field type");
     }
 
     /**
