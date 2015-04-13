@@ -445,6 +445,8 @@ public class RestClient {
      * @param path Full URI of the remote endpoint
      * @param file java.io.File
      * 
+     * @return JSON-encoded result or null when there's no content returned
+     * 
      * @throws URISyntaxException 
      * @throws IOException 
      * @throws RestException 
@@ -462,6 +464,8 @@ public class RestClient {
      *
      * @param path    Full URI of the remote endpoint
      * @param attachments   the name of the attachment
+     *
+     *@return JSON-encoded result or null when there's no content returned
      *
      * @throws URISyntaxException
      * @throws IOException
@@ -536,7 +540,9 @@ public class RestClient {
     public static Map<String, Object> JSONtoMap(Object object) throws JSONException, JiraException {
         Map<String, Object> map = new HashMap<String, Object>();
 
-        if (object instanceof JSONArray) {
+        if (object == null) {
+        	return null;
+        } else if (object instanceof JSONArray) {
     		map.put("data", JSONtoList(object));
         } else {
 	        if (!(object instanceof JSONObject)) {
