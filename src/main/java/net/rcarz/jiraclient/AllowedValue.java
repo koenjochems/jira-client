@@ -60,4 +60,8 @@ public class AllowedValue extends Resource {
     public String getValue() {
         return value;
     }
+    
+    public boolean isAllowed(String value) {
+    	return value.equals(this.value);
+    }
 }

@@ -51,6 +51,18 @@ public final class Field extends AField {
         public int customId;
         public List<AllowedValue> allowedValues;
         
+        /**
+    	 * A AllowedValue exception.
+    	 */
+    	public class AllowedValueException extends Exception {
+
+    		private static final long serialVersionUID = 1L;
+
+    		public AllowedValueException(String field, String value) {
+    	        super("Value: " + value + " is not allowed for field: " + field);
+    	    }
+    	}
+    	
         public Meta(String key, Map<String, Object> data) throws JiraException {
         	this.key = key;
         	
@@ -97,6 +109,22 @@ public final class Field extends AField {
 
 	        return this.toString().equals(o.toString());
 	    }
+		
+		/**
+		 * Validate if the value is allowed for this field.
+		 * 
+		 * @param value
+		 * @throws AllowedValueException 
+		 */
+		public void validateFieldValue(String value) throws AllowedValueException {
+			for (AllowedValue av : allowedValues) {
+				if (av.isAllowed(value)) {
+					return;
+				}
+			}
+			
+			throw new AllowedValueException(name, value);
+		}
     }
 
     /**
