@@ -347,10 +347,10 @@ public final class Field extends AField {
     }
 
     /**
-     * Extracts field metadata from an editmeta JSON object.
+     * Extracts field metadata from an editmeta Map object.
      *
      * @param name Field name
-     * @param createmeta Edit metadata JSON object
+     * @param createmeta Edit metadata Map object
      *
      * @return a Meta instance with field metadata
      *

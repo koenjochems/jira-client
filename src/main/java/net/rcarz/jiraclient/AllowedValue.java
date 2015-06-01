@@ -27,6 +27,7 @@ import java.util.Map;
 public class AllowedValue extends Resource {
 
 	private String description;
+	private String value;
 	
     /**
      * Creates an AllowedValue from a JSON payload.
@@ -49,9 +50,14 @@ public class AllowedValue extends Resource {
     @Override
 	protected void deserialise(Map<String, Object> data) throws JiraException {
     	description = Field.getString(data.get("description"));
+    	value = Field.getString(data.get("value"));
 	}
 
     public String getDescription() {
         return description;
+    }
+    
+    public String getValue() {
+        return value;
     }
 }
