@@ -63,4 +63,10 @@ public class RapidView extends GreenHopperResource {
     public Boolean isSprintSupportEnabled() {
         return sprintSupportEnabled;
     }
+
+	@Override
+	public String getValue() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

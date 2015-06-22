@@ -60,5 +60,10 @@ public class Component extends Resource {
     public boolean isAssigneeTypeValid() {
         return isAssigneeTypeValid;
     }
+
+	@Override
+	public String getValue() {
+		return getName();
+	}
 }
 

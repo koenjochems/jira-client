@@ -61,7 +61,7 @@ public class TimeTracking extends Resource {
         this.originalEstimateSeconds = tt.originalEstimateSeconds;
         this.remainingEstimateSeconds = tt.remainingEstimateSeconds;
         this.timeSpent = tt.timeSpent;
-        this.timeSpentSeconds =tt.timeSpentSeconds;
+        this.timeSpentSeconds = tt.timeSpentSeconds;
     }
     
     /**
@@ -134,4 +134,9 @@ public class TimeTracking extends Resource {
     public int getTimeSpentSeconds() {
         return timeSpentSeconds;
     }
+
+	@Override
+	public String getValue() {
+		return getTimeSpent();
+	}
 }

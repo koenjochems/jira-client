@@ -55,5 +55,10 @@ public class Priority extends Resource {
     public String getIconUrl() {
         return iconUrl;
     }
+
+	@Override
+	public String getValue() {
+		return getName();
+	}
 }
 

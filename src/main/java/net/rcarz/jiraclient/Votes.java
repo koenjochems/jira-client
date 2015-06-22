@@ -66,4 +66,9 @@ public class Votes extends Resource {
     public boolean hasVoted() {
         return hasVoted;
     }
+
+	@Override
+	public String getValue() {
+		return String.valueOf(getVotes());
+	}
 }

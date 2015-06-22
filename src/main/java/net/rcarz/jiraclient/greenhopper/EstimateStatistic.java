@@ -71,4 +71,9 @@ public class EstimateStatistic extends GreenHopperResource {
     public String getFieldText() {
         return statFieldText;
     }
+
+	@Override
+	public String getValue() {
+		return String.valueOf(getFieldValue());
+	}
 }

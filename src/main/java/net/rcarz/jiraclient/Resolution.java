@@ -55,4 +55,9 @@ public class Resolution extends Resource {
     public String getDescription() {
         return description;
     }
+
+	@Override
+	public String getValue() {
+		return getName();
+	}
 }

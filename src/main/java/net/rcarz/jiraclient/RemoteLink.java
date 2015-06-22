@@ -42,4 +42,9 @@ public class RemoteLink extends Resource {
     public String getRemoteUrl() {
         return remoteUrl;
     }
+
+	@Override
+	public String getValue() {
+		return getTitle();
+	}
 }

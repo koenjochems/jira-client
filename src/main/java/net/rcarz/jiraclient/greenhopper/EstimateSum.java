@@ -54,11 +54,16 @@ public class EstimateSum extends GreenHopperResource {
    		text = GreenHopperField.getString(data.get("text"));
 	}
 
-    public Double getValue() {
+    public Double getSumValue() {
         return value;
     }
 
     public String getText() {
         return text;
     }
+
+	@Override
+	public String getValue() {
+		return String.valueOf(getSumValue());
+	}
 }

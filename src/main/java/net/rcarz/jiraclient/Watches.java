@@ -66,4 +66,9 @@ public class Watches extends Resource {
     public boolean isWatching() {
         return isWatching;
     }
+
+	@Override
+	public String getValue() {
+		return String.valueOf(getWatchCount());
+	}
 }

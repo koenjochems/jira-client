@@ -162,4 +162,14 @@ public class Backlog extends GreenHopperResource {
     public Map<String, List<RapidViewVersion>> getVersionsPerProject() {
         return versionsPerProject;
     }
+
+	@Override
+	public String getValue() {
+		List<String> values = new ArrayList<String>();
+		for (SprintIssue item : issues) {
+			values.add(item.getValue());
+		}
+		
+		return values.toString();
+	}
 }

@@ -104,4 +104,9 @@ public class Project extends Resource {
     public Map<String, Object> getRoles() {
         return roles;
     }
+
+	@Override
+	public String getValue() {
+		return getKey();
+	}
 }

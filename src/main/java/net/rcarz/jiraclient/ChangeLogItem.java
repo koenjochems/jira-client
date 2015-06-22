@@ -129,4 +129,9 @@ public class ChangeLogItem extends Resource {
     public String getToString() {
         return toString;
     }
+
+	@Override
+	public String getValue() {
+		return getFromString() + " -> " + getToString();
+	}
 }

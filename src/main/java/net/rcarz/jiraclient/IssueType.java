@@ -72,4 +72,9 @@ public class IssueType extends Resource {
     public Map<String, Object> getFields() {
         return fields;
     }
+
+	@Override
+	public String getValue() {
+		return getName();
+	}
 }

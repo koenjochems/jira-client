@@ -55,4 +55,9 @@ public class RapidViewProject extends GreenHopperResource {
     public String toString() {
         return key;
     }
+
+	@Override
+	public String getValue() {
+		return getKey();
+	}
 }

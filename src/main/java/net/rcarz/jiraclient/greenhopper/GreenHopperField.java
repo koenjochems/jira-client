@@ -25,7 +25,6 @@ import java.util.Map;
 
 import net.rcarz.jiraclient.AField;
 import net.rcarz.jiraclient.JiraException;
-import net.rcarz.jiraclient.RestClient;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;

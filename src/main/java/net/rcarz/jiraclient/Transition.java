@@ -58,7 +58,16 @@ public class Transition extends Resource {
         return toStatus;
     }
 
-    public Map<?, ?> getFields() {
+    public Map<String, Object> getFields() {
         return fields;
     }
+
+	@Override
+	public String getValue() {
+		if (toStatus != null) {
+			return toStatus.getValue();
+		} else {
+			return getName();
+		}
+	}
 }

@@ -306,4 +306,9 @@ public class Issue extends Resource {
     public Date getUpdatedDate() {
         return updatedDate;
     }
+
+	@Override
+	public String getValue() {
+		return getKey();
+	}
 }

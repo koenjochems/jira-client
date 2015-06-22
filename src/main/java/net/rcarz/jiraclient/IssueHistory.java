@@ -54,4 +54,14 @@ public class IssueHistory extends Resource {
     public Date getCreated() {
         return created;
     }
+
+	@Override
+	public String getValue() {
+		List<String> values = new ArrayList<String>();
+		for (IssueHistoryItem item : changes) {
+			values.add(item.getValue());
+		}
+		
+		return values.toString();
+	}
 }

@@ -75,4 +75,6 @@ public abstract class AResource {
     public String toString() {
         return getName();
     }
+    
+    public abstract String getValue();
 }

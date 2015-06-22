@@ -91,4 +91,9 @@ public class WorkLog extends Resource {
     public int getTimeSpentSeconds() {
         return timeSpentSeconds;
     }
+
+	@Override
+	public String getValue() {
+		return getAuthor() + ": " + getComment();
+	}
 }

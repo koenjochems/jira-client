@@ -61,4 +61,9 @@ public class LinkType extends Resource {
     public String getOutward() {
         return outward;
     }
+
+	@Override
+	public String getValue() {
+		return getName();
+	}
 }

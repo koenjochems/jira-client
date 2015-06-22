@@ -157,4 +157,9 @@ public class GreenHopperIssue extends GreenHopperResource {
     public int getProjectId() {
         return projectId;
     }
+
+	@Override
+	public String getValue() {
+		return getKey();
+	}
 }

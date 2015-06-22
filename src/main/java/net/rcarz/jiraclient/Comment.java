@@ -85,4 +85,9 @@ public class Comment extends Resource {
     public Date getUpdatedDate() {
         return updated;
     }
+
+	@Override
+	public String getValue() {
+		return getBody();
+	}
 }

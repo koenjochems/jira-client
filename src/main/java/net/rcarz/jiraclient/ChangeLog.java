@@ -19,6 +19,7 @@
 
 package net.rcarz.jiraclient;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -60,4 +61,14 @@ public class ChangeLog extends Resource {
     public List<ChangeLogEntry> getEntries() {
         return entries;
     }
+
+	@Override
+	public String getValue() {
+		List<String> values = new ArrayList<String>();
+		for (ChangeLogEntry item : entries) {
+			values.add(item.getValue());
+		}
+		
+		return values.toString();
+	}
 }

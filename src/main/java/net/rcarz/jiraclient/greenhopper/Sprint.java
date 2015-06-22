@@ -93,4 +93,14 @@ public class Sprint extends GreenHopperResource {
     public List<Integer> getIssuesIds() {
         return issuesIds;
     }
+
+	@Override
+	public String getValue() {
+		List<String> values = new ArrayList<String>();
+		for (SprintIssue item : issues) {
+			values.add(item.getValue());
+		}
+		
+		return values.toString();
+	}
 }

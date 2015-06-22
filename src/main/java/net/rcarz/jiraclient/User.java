@@ -87,4 +87,9 @@ public class User extends Resource {
     public String getEmail() {
         return email;
     }
+
+	@Override
+	public String getValue() {
+		return getDisplayName();
+	}
 }

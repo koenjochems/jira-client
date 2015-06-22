@@ -61,4 +61,9 @@ public class RapidViewVersion extends GreenHopperResource {
     public boolean isReleased() {
         return released;
     }
+
+	@Override
+	public String getValue() {
+		return String.valueOf(getSequence());
+	}
 }

@@ -55,4 +55,9 @@ public class IssueHistoryItem extends Resource {
     public String getToStr() {
         return toStr;
     }
+
+	@Override
+	public String getValue() {
+		return getFromStr() + " -> " + getToStr();
+	}
 }

@@ -106,4 +106,9 @@ public class SprintReport extends GreenHopperResource {
     public List<String> getIssueKeysAddedDuringSprint() {
         return issueKeysAddedDuringSprint;
     }
+
+	@Override
+	public String getValue() {
+		return getSprint().getValue();
+	}
 }

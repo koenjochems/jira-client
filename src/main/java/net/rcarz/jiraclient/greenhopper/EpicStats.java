@@ -85,4 +85,9 @@ public class EpicStats extends GreenHopperResource {
     public int getDone() {
         return done;
     }
+
+	@Override
+	public String getValue() {
+		return "Done: " + String.valueOf(getDone()) + " - Not done: " + String.valueOf(getNotDone());
+	}
 }

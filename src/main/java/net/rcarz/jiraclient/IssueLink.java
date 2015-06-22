@@ -71,4 +71,9 @@ public class IssueLink extends Resource {
     public Issue getInwardIssue() {
         return inwardIssue;
     }
+
+	@Override
+	public String getValue() {
+		return getInwardIssue() + " " + type.getInward() + " " + getOutwardIssue();
+	}
 }

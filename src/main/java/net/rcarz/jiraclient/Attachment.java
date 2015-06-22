@@ -93,4 +93,9 @@ public class Attachment extends Resource {
     public int getSize() {
         return size;
     }
+
+	@Override
+	public String getValue() {
+		return getContentUrl();
+	}
 }
