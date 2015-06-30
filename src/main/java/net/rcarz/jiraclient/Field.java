@@ -150,7 +150,11 @@ public final class Field extends AField {
      * Allowed value types.
      */
     public enum ValueType {
-        KEY("key"), NAME("name"), ID_NUMBER("id"), VALUE("value");
+        KEY("key"), 
+        NAME("name"), 
+        ID_NUMBER("id"), 
+        VALUE("value");
+        
         private String typeName;
 
         private ValueType(String typeName) {
@@ -224,10 +228,10 @@ public final class Field extends AField {
     public static final String CREATED_DATE = "created";
     public static final String UPDATED_DATE = "updated";
     public static final String TRANSITION_TO_STATUS = "to";
-
+    
     public static final String DATE_FORMAT = "yyyy-MM-dd";
     public static final String DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
-
+    
     private Field() { }
     
     /**
@@ -342,8 +346,8 @@ public final class Field extends AField {
      * @return a list of Resources found in ra
      * @throws JiraException 
      */
-    public static <T extends AResource> List<T> getResourceArray(Class<T> type, Object data) throws JiraException {
-    	List<T> results = new ArrayList<T>();
+    public static <T extends AResource> ResourceList<T> getResourceArray(Class<T> type, Object data) throws JiraException {
+    	ResourceList<T> results = new ResourceList<T>();
 
         if (data instanceof List) {
             for (Object item : getList(data)) {

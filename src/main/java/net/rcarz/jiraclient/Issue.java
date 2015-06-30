@@ -86,14 +86,14 @@ public class Issue extends Resource {
 
     /* system fields */
     private User assignee = null;
-    private List<Attachment> attachments = null;
+    private ResourceList<Attachment> attachments = null;
     private ChangeLog changeLog = null;
-    private List<Comment> comments = null;
-    private List<Component> components = null;
+    private ResourceList<Comment> comments = null;
+    private ResourceList<Component> components = null;
     private String description = null;
     private Date dueDate = null;
-    private List<Version> fixVersions = null;
-    private List<IssueLink> issueLinks = null;
+    private ResourceList<Version> fixVersions = null;
+    private ResourceList<IssueLink> issueLinks = null;
     private IssueType issueType = null;
     private List<String> labels = null;
     private Issue parent = null;
@@ -103,13 +103,13 @@ public class Issue extends Resource {
     private Resolution resolution = null;
     private Date resolutionDate = null;
     private Status status = null;
-    private List<Issue> subtasks = null;
+    private ResourceList<Issue> subtasks = null;
     private String summary = null;
     private TimeTracking timeTracking = null;
-    private List<Version> versions = null;
+    private ResourceList<Version> versions = null;
     private Votes votes = null;
     private Watches watches = null;
-    private List<WorkLog> workLogs = null;
+    private ResourceList<WorkLog> workLogs = null;
     private Integer timeEstimate = null;
     private Integer timeSpent = null;
     private Date createdDate = null;
@@ -180,6 +180,71 @@ public class Issue extends Resource {
      */
     public Object getField(String name) {
         return fields != null ? fields.get(name) : null;
+    }
+    
+    public String getFieldvalue(String name) {
+    	switch (name) {
+		case Field.ASSIGNEE:
+			return assignee.getValue();
+		case Field.ATTACHMENT:
+			return attachments.getValue();
+		case Field.CHANGE_LOG:
+			return changeLog.getValue();
+		case Field.COMMENT:
+			return comments.getValue();
+		case Field.COMPONENTS:
+			return components.getValue();
+		case Field.CREATED_DATE:
+			return createdDate.toString();
+		case Field.DESCRIPTION:
+			return description;
+		case Field.DUE_DATE:
+			return dueDate.toString();
+		case Field.FIX_VERSIONS:
+			return fixVersions.getValue();
+		case Field.ISSUE_LINKS:
+			return issueLinks.getValue();
+		case Field.ISSUE_TYPE:
+			return issueType.getValue();
+		case Field.LABELS:
+			return labels.toString();
+		case Field.PARENT:
+			return parent.getValue();
+		case Field.PRIORITY:
+			return priority.getValue();
+		case Field.PROJECT:
+			return project.getValue();
+		case Field.REPORTER:
+			return reporter.getValue();
+		case Field.RESOLUTION:
+			return resolution.getValue();
+		case Field.RESOLUTION_DATE:
+			return resolutionDate.toString();
+		case Field.STATUS:
+			return status.getValue();
+		case Field.SUBTASKS:
+			return subtasks.getValue();
+		case Field.SUMMARY:
+			return summary;
+		case Field.TIME_ESTIMATE:
+			return timeEstimate.toString();
+		case Field.TIME_SPENT:
+			return timeSpent.toString();
+		case Field.TIME_TRACKING:
+			return timeTracking.toString();
+		case Field.UPDATED_DATE:
+			return updatedDate.toString();
+		case Field.VERSIONS:
+			return versions.getValue();
+		case Field.VOTES:
+			return votes.getValue();
+		case Field.WATCHES:
+			return watches.getValue();
+		case Field.WORKLOG:
+			return workLogs.getValue();
+		default:
+			return null;
+    	}
     }
 
     @Override
