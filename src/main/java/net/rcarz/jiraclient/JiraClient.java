@@ -892,37 +892,39 @@ public class JiraClient extends AClient {
      * 
      * @param projectKey
      * @param issueType
-     * @return
+     * @return Map of field key and field meta data pairs
      * @throws JiraException
      */
     public Map<String, Meta> getCreateMetadata(String projectKey, String issueType) throws JiraException {
     	Map<String, Object> data = null;
     	Map<String, Meta> metadata = new HashMap<String, Meta>();
 
-        try {
-        	Map<String, String> queryParams = new HashMap<String, String>();
-        	queryParams.put("expand", "projects.issuetypes.fields");
-        	queryParams.put("projectKeys", projectKey);
-        	queryParams.put("issuetypeNames", issueType);
-        	data = restclient.get(queryParams, getBaseUri(), Issue.URI, CREATEMETA_URI);
-        } catch (Exception ex) {
-            throw new JiraException("Failed to retrieve issue metadata", ex);
-        }
-
-        if (!(data.get("projects") instanceof List))
-            throw new JiraException("Create metadata is malformed");
-
-        List<Project> projects = Field.getResourceArray(Project.class, data.get("projects"));
-
-        if (projects.isEmpty() || projects.get(0).getIssueTypes().isEmpty())
-            throw new JiraException("Project '" + projectKey + "'  or issue type '" + issueType + 
-                    "' missing from create metadata. Do you have enough permissions?");
-
-        Map<String, Object> fields = projects.get(0).getIssueTypes().get(0).getFields();
-        
-        for (String key : fields.keySet()) {
-        	metadata.put(key, Field.getFieldMetadata(key, fields));
-		}
+    	if (projectKey != null && issueType != null) {
+	        try {
+	        	Map<String, String> queryParams = new HashMap<String, String>();
+	        	queryParams.put("expand", "projects.issuetypes.fields");
+	        	queryParams.put("projectKeys", projectKey);
+	        	queryParams.put("issuetypeNames", issueType);
+	        	data = restclient.get(queryParams, getBaseUri(), Issue.URI, CREATEMETA_URI);
+	        } catch (Exception ex) {
+	            throw new JiraException("Failed to retrieve issue metadata", ex);
+	        }
+	
+	        if (!(data.get("projects") instanceof List))
+	            throw new JiraException("Create metadata is malformed");
+	
+	        List<Project> projects = Field.getResourceArray(Project.class, data.get("projects"));
+	
+	        if (projects.isEmpty() || projects.get(0).getIssueTypes().isEmpty())
+	            throw new JiraException("Project '" + projectKey + "'  or issue type '" + issueType + 
+	                    "' missing from create metadata. Do you have enough permissions?");
+	
+	        Map<String, Object> fields = projects.get(0).getIssueTypes().get(0).getFields();
+	        
+	        for (String key : fields.keySet()) {
+	        	metadata.put(key, Field.getFieldMetadata(key, fields));
+			}
+    	}
         
         return metadata;
     }
