@@ -483,13 +483,13 @@ public final class Field extends AField {
         throws JiraException, UnsupportedOperationException {
 
         if (createmeta.type == null)
-            throw new JiraException("Field metadata is missing a type");
+            throw new JiraException("Field metadata is missing a type - fieldname: " + name);
 
         if (createmeta.type.equals("array")) {
             if (value == null)
                 value = new ArrayList<Object>();
             else if (!(value instanceof Iterable))
-                throw new JiraException("Field expects an Iterable value");
+                throw new JiraException("Field expects an Iterable value - fieldname: " + name);
 
             return toArray((Iterable<?>)value, createmeta.items);
         } else if (createmeta.type.equals("date")) {
@@ -498,7 +498,7 @@ public final class Field extends AField {
 
             Date d = toDate(value);
             if (d == null)
-                throw new JiraException("Field expects a date value or format is invalid");
+                throw new JiraException("Field expects a date value or format is invalid - fieldname: " + name);
 
             SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
             return df.format(d);
@@ -506,7 +506,7 @@ public final class Field extends AField {
             if (value == null)
                 return JSONNull.getInstance();
             else if (!(value instanceof Timestamp))
-                throw new JiraException("Field expects a Timestamp value");
+                throw new JiraException("Field expects a Timestamp value - fieldname: " + name);
 
             SimpleDateFormat df = new SimpleDateFormat(DATETIME_FORMAT);
             return df.format(value);
@@ -557,12 +557,12 @@ public final class Field extends AField {
             if(!(value instanceof java.lang.Integer) && !(value instanceof java.lang.Double) && !(value 
                     instanceof java.lang.Float) && !(value instanceof java.lang.Long) )
             {
-                throw new JiraException("Field expects a Numeric value");
+                throw new JiraException("Field expects a Numeric value - fieldname: " + name);
             }
             return value;
         }
 
-        throw new UnsupportedOperationException(createmeta.type + " is not a supported field type");
+        throw new UnsupportedOperationException(createmeta.type + " is not a supported field type - fieldname: " + name);
     }
 
     /**
