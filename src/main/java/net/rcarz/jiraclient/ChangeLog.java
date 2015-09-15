@@ -63,6 +63,6 @@ public class ChangeLog extends Resource {
 
 	@Override
 	public String getValue() {
-		return entries.getValue();
+		return entries.getValueString();
 	}
 }

@@ -95,6 +95,6 @@ public class ChangeLogEntry extends Resource {
 
 	@Override
 	public String getValue() {
-		return items.getValue();
+		return items.getValueString();
 	}
 }

@@ -182,7 +182,7 @@ public class Issue extends Resource {
         return fields != null ? fields.get(name) : null;
     }
     
-    public String getFieldvalue(String name) {
+    public Object getFieldvalue(String name) {
     	switch (name) {
 		case Field.ASSIGNEE:
 			return assignee.getValue();
